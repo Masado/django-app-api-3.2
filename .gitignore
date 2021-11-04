@@ -131,3 +131,6 @@ dmypy.json
 # environment files
 .env.prod
 .env.prod.db
+
+# pycharm files
+.idea/

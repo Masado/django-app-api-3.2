@@ -1,0 +1,262 @@
+{% extends 'base.html' %},
+
+{% block title %}Test{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            text-align: center;
+            background: white;
+        }
+
+        table {
+            padding: 1em 1.8em;
+        }
+
+        td {
+            min-width: 1em;
+            {#max-width: 40vw;#}
+            max-width: 12em;
+            padding: 0.1em 0.1em 0.1em 0.1em;
+        }
+
+        table {
+            margin: 0.5em 0.5em;
+        {#white-space: nowrap;#}
+        }
+
+        select {
+            margin: 0.5em 0.5em;
+        }
+        input {
+            border: none;
+            outline: none;
+            max-width: 12em;
+        }
+        input[type="text"], textarea{
+            background-color: white;
+        }
+        input[type="text"].no-w-bg {
+            background-color: #d1d1d1;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div style="display: block; max-width: 100%; margin-top: 1em">
+
+        <form action="." method="post" name="spreadsheet_gen" enctype="multipart/form-data" onsubmit="set_rows_and_cols()">
+            {% csrf_token %}
+            <label for="id_sheet_name">Enter a name for your spreadsheet or leave it empty for a default name: </label>
+            <input id="id_sheet_name" name="sheet_name" type="text" class="ml-4 no-w-bg" style="border: 2px inset #EBE9ED; outline: black">
+            <br>
+
+            <label style="margin-top: 1em" for="id_select">For what kind of analysis would you like to generate the
+                input file? </label>
+            <select id="id_select" name="sheet_type">
+                <option value="rna_samplesheet">RNA-Seq samplesheet</option>
+                <option value="atac_design">ATAC-Seq design file</option>
+                <option value="chip_design">ChIP-Seq design file</option>
+                <option value="sarek_input">Sarek input file</option>
+            </select>
+
+            <table id="id_table_spreadsheet">
+                <thead id="id_thead">
+                <tr>
+                    <th>sample</th>
+                    <th>fastq_1</th>
+                    <th>fastq_2</th>
+                    <th>strandedness</th>
+                </tr>
+                </thead>
+                <tbody id="id_tbody">
+                <tr>
+                    <td><input type="text" id="id_r0_c0" name="r0_c0"></td>
+                    <td><input type="text" id="id_r0_c1" name="r0_c1"></td>
+                    <td><input type="text" id="id_r0_c2" name="r0_c2"></td>
+                    <td><input type="text" id="id_r0_c3" name="r0_c3"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" id="id_r1_c0" name="r1_c0"></td>
+                    <td><input type="text" id="id_r1_c1" name="r1_c1"></td>
+                    <td><input type="text" id="id_r1_c2" name="r1_c2"></td>
+                    <td><input type="text" id="id_r1_c3" name="r1_c3"></td>
+                </tr>
+
+                </tbody>
+            </table>
+
+            <br>
+            <div class="inline-group">
+                <button type="button" onclick="add_row()">Add row</button>
+                <button type="button" class="ml-4" onclick="remove_row()">Remove row</button>
+            </div>
+            <div id="id_sarek_buttons" style="display: none">
+                <br>
+                <button type="button" onclick="add_col()">Add column</button>
+                <button type="button" class="ml-4" onclick="remove_col()">Remove column</button>
+            </div>
+            <input id="id_rows" name="rows" type="number" value="0" hidden>
+            <input id="id_cols" name="cols" type="number" value="0" hidden>
+            <br>
+            <button type="submit" name="spreadsheet_load">Generate spreadsheet</button>
+        </form>
+    </div>
+    <script>
+        function add_row() {
+            const table = document.getElementById("id_table_spreadsheet");
+            const tb = document.getElementById("id_tbody");
+            const rowNum = table.querySelectorAll("tbody tr").length;
+            const colNum = table.querySelectorAll("tbody tr td").length / table.querySelectorAll("tbody tr").length;
+
+            const newRow = tb.insertRow(rowNum);
+            for (let c = 0; c < colNum; c++) {
+                {#alert("ping");#}
+                let cell = newRow.insertCell(c);
+                cell.innerHTML = '<input id="id_r' + rowNum + '_c' + c + '" name="r' + rowNum + '_c' + c + '" type="text">'
+                {#cell.classList.add("no-white-space");#}
+            }
+        }
+
+        function remove_row() {
+            const table = document.getElementById("id_table_spreadsheet");
+            const tb = document.getElementById("id_tbody");
+            const rowNum = table.querySelectorAll("tbody tr").length;
+
+            if (rowNum > 1) {
+                tb.deleteRow(rowNum - 1);
+            } else {
+                const colNum = tb.rows[0].cells.length;
+                tb.deleteRow(rowNum - 1);
+                const row = tb.insertRow(0);
+                for (let c = 0; c < colNum; c++) {
+                    let cell = row.insertCell(c);
+                    cell.innerHTML = '<input id="id_r' + rowNum + '_c' + c + '" name="r' + rowNum + '_c' + c + '" type="text">'
+                    {#cell.contentEditable = "true";#}
+                }
+            }
+        }
+
+        function add_col() {
+            const tb = document.getElementById("id_tbody");
+            const colNum = tb.rows[0].cells.length;
+            tb.querySelectorAll("tr").forEach(Row => {
+                {#let rowNum = tb.querySelectorAll("tr").length;#}
+                let rowNum = Row.rowIndex;
+                const cell = Row.insertCell();
+                cell.innerHTML = '<input id="id_r' + rowNum + '_c' + colNum + '" name="r' + rowNum + '_c' + colNum + '" type="text">'
+                {#cell.contentEditable = "true";#}
+            })
+
+        }
+
+        function remove_col() {
+            const tb = document.getElementById("id_tbody");
+            const colNum = tb.rows[0].cells.length;
+            tb.querySelectorAll("tr").forEach(Row => {
+                Row.deleteCell(colNum - 1);
+            })
+
+        }
+
+        const selector = document.getElementById("id_select")
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const table = document.getElementById("id_table_spreadsheet")
+            const select = document.getElementById("id_select")
+
+            select.addEventListener("change", () => {
+                table.deleteTHead();
+
+                const header = table.createTHead();
+                header.id = "id_thead";
+                const row = header.insertRow(0);
+
+                const value = select.value;
+                if (value === "rna_samplesheet") {
+                    document.getElementById("id_sarek_buttons").style.display = "none";
+                    const list = ['sample', 'fastq_1', 'fastq_2', 'strandedness'];
+
+                    let txt = "";
+                    for (let x in list) {
+                        const cell = row.insertCell();
+                        txt = list[x]
+                        cell.innerHTML = "<b>" + txt + "</b>";
+                    }
+                }
+                if (value === "atac_design") {
+                    document.getElementById("id_sarek_buttons").style.display = "none";
+                    const list = ['group', 'replicate', 'fastq_1', 'fastq_2'];
+
+                    let txt = "";
+                    for (let x in list) {
+                        const cell = row.insertCell();
+                        txt = list[x]
+                        cell.innerHTML = "<b>" + txt + "</b>";
+                    }
+                }
+                if (value === "chip_design") {
+                    document.getElementById("id_sarek_buttons").style.display = "none";
+                    const list = ['group', 'replicate', 'fastq_1', 'fastq_2', 'antibody', 'control'];
+
+                    let txt = "";
+                    for (let x in list) {
+                        const cell = row.insertCell();
+                        txt = list[x]
+                        cell.innerHTML = "<b>" + txt + "</b>";
+                    }
+                }
+                if (value === "sarek_input") {
+                    document.getElementById("id_sarek_buttons").style.display = "block";
+                    const list = ['', '', '', '', '', ''];
+
+                    let txt = "";
+                    for (let x in list) {
+                        const cell = row.insertCell();
+                        txt = list[x]
+                        cell.innerHTML = "<b>" + txt + "</b>";
+                    }
+                }
+                const tbod = document.getElementById("id_tbody");
+                const colNum = table.querySelectorAll("thead td").length;
+
+                let rowNum = tbod.querySelectorAll("tr").length;
+                for (let i = tbod.rows.length - 1; i >= 0; i--) {
+                    tbod.deleteRow(i)
+                }
+
+                for (let r = 0; r < 2; r++) {
+                    let rowNum = tbod.querySelectorAll("tr").length;
+                    const row = tbod.insertRow(r);
+                    for (let c = 0; c < colNum; c++) {
+                        let cell = row.insertCell(c);
+                        cell.innerHTML = '<input id="id_r' + rowNum + '_c' + c + '" name="r' + rowNum + '_c' + c + '" type="text">'
+
+                    }
+                }
+                if (value === "sarek_input") {
+                    table.deleteTHead();
+                }
+            })
+        })
+
+        function set_rows_and_cols() {
+            const tbod = document.getElementById("id_tbody");
+            const rowNum = tbod.querySelectorAll("tr").length;
+            const colNum = tbod.rows[0].cells.length;
+
+            const rows =  document.getElementById("id_rows");
+            const cols =  document.getElementById("id_cols");
+
+            rows.value = rowNum;
+            cols.value = colNum;
+
+            {#return true;#}
+
+        }
+
+    </script>
+
+{% endblock %}
