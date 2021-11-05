@@ -131,3 +131,10 @@ dmypy.json
 # environment files
 .env.prod
 .env.prod.db
+
+# media root
+app/mediafiles/spreadsheets
+app/mediafiles/run
+
+# pycharm files
+.idea/

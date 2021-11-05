@@ -1,0 +1,20 @@
+name: nf-core-rnaseq-3.1
+
+channels:
+  - conda-forge
+  - bioconda
+  - mvdbeek
+  - defaults
+
+dependencies:
+  - bioconda::gffread
+  - bioconda::hisat2
+  - bioconda::qualimap
+  - bioconda::rsem
+  - bioconda::rseqc=4.0.0
+  - bioconda::salmon=1.5.1
+  - bioconda::sortmerna=4.3.3
+  - bioconda::star=2.6.1d
+  - bioconda::stringtie=2.1.7
+  - bioconda::umi_tools=1.1.1
+  - mvdbeek::ucsc_tools=332
