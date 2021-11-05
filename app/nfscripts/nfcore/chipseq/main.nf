@@ -467,8 +467,8 @@ process COPY_OUT_BED {
     path gtf from ch_gtf
         
     output:
-    path gene_bed into ch_gene_bed
-    path gtf into ch_gtf
+    path gene_bed into ch_gene_bed_void
+    path gtf into ch_gtf_co
     path 'gene_bed_name.txt'
     path 'gtf_name.txt'
         

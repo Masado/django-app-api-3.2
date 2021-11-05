@@ -1,9 +1,9 @@
 import os
-import shutil
 import zipfile
 import tarfile
 import pandas as pd
 import numpy as np
+import time
 from django.shortcuts import render, redirect
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
@@ -24,51 +24,6 @@ def index_view(request, *args, **kwargs):
     run_id = generate_and_check_id()
     # render the page
     return render(request, 'run/index.html', {'run_id': run_id})
-
-
-class ChoosePipelinePath(View):
-    template_name = "run/choose_pipeline_path.html"
-
-    def get(self, request, *args, **kwargs):
-        # import Dataset
-        from pipelines.models import Dataset
-
-        dataset_list = Dataset.objects.order_by("short")
-
-        return render(request, template_name=self.template_name, context={'dataset_list': dataset_list})
-
-    def post(self, request, *args, **kwargs):
-        if 'choose' in request.POST:
-            # import Dataset & Pipeline
-            from pipelines.models import Dataset, Pipeline
-
-            # get dataset to be used
-            original_pipe = request.POST['choose']
-            # get the corresponding Dataset-object
-            op = Dataset.objects.get(base_pipeline_name=original_pipe)
-
-            # get Pipeline object
-            base_pipe = op.base_pipe_name_wo
-            base_pipe = Pipeline.objects.get(pipeline_name=base_pipe)
-
-            # for every dataset in the datasetpipelines set append to list of valid pipelines
-            available_pipes_list = []
-            for pipe in op.datasetpipelines_set.all():
-                available_pipes_list.append(pipe)
-
-            # set context
-            context = {'available_pipes_list': available_pipes_list, 'base_pipe': base_pipe}
-
-            # render page
-            return render(request, template_name='run/choose_pipeline_path_s2.html', context=context)
-
-        elif 'submit_pipeline' in request.POST:
-            from .tasks import find_pipeline
-            run_id = generate_and_check_id()
-            # get name of pipeline
-            chosen_pipeline = request.POST['submit_pipeline']
-            # get and redirect to url of pipeline
-            return find_pipeline(chosen_pipeline, run_id)
 
 
 # redirecting views
@@ -113,7 +68,7 @@ def get_fail_view(request, *args, **kwargs):
     id_path = str(settings.MEDIA_ROOT) + "/run/" + run_id + "/"
 
     if request.method == 'POST' and 'download_log' in request.POST:
-        file_path = settings.MEDIA_ROOT + '/run/' + run_id + "/" + ".nextflow.log"
+        file_path = str(settings.MEDIA_ROOT) + '/run/' + run_id + "/" + ".nextflow.log"
         return download_file(request, file_path)
         # return download_file(request, run_id, ".nextflow.log")
 
@@ -154,7 +109,7 @@ def spreadsheet_view(request, *args, **kwargs):
 
     if request.method == 'POST' and 'spreadsheet_load' in request.POST:
 
-        id_path = settings.MEDIA_ROOT + '/spreadsheets/' + sheet_id + '/'
+        id_path = str(settings.MEDIA_ROOT) + '/spreadsheets/' + sheet_id + '/'
 
         # create working directory
         create_directory(id_path)
@@ -309,11 +264,11 @@ class PostRNASeq(View):
 
     # get function
     def get(self, request, *args, **kwargs):
-        # set run_id
+        # set variables
         from .tasks import generate_and_check_id
         run_id = generate_and_check_id()
-        # run_id = kwargs['run_id']
-        # render page
+
+        # render pipeline page
         return render(request, self.template_name, {'run_id': run_id})
 
     # post function
@@ -321,12 +276,10 @@ class PostRNASeq(View):
     def post(request, *args, **kwargs):
         if 'run_post_rnaseq' in request.POST:
             # set variables
-            # run_id = kwargs["run_id"]
-
             run_id = request.POST["run_id"]
 
             id_path = get_id_path(run_id)
-            out = settings.MEDIA_ROOT + '/run/' + run_id + '/output/'
+            out = str(settings.MEDIA_ROOT) + '/run/' + run_id + '/output/'
 
             # check if directory already exists
             print("starting 'check_for_run_dir'")
@@ -462,12 +415,11 @@ class PostAC(View):
     template_name = 'run/run_postatacchip_html.html'
 
     def get(self, request, *args, **kwargs):
-        # set run_id
+        # set variables
         from .tasks import generate_and_check_id
         run_id = generate_and_check_id()
-        # run_id = kwargs['run_id']
 
-        # render page
+        # render pipeline page
         return render(request, self.template_name, {'run_id': run_id})
 
     @staticmethod
@@ -818,7 +770,7 @@ class AtacSeqRun(View):
                     return redirect('/run/download_' + run_id + '/')
                 else:
                     result = str(result)
-                    return redirect('/run/nfcore/fail_' + run_id + '_' + result + '/')
+                    return redirect('/run/fail_' + run_id + '_' + result + '/')
 
         elif "run_atacseq_advanced" in request.POST:
 
@@ -1361,7 +1313,7 @@ class ChipSeqRun(View):
                 return redirect('/run/download_' + run_id + '/')
             else:
                 result = str(result)
-                return redirect('/run/nfcore/fail' + run_id + '_' + result + '/')
+                return redirect('/run/fail_' + run_id + '_' + result + '/')
 
 
 # class function for the nf-core RNA-Seq pipeline
@@ -1383,7 +1335,6 @@ class RnaSeqRun(View):
     @staticmethod
     def post(request, *args, **kwargs):
         # set variables
-        # run_id = kwargs['run_id']
         run_id = request.POST['run_id']
         id_path = get_id_path(run_id)  # id_path is nextflow's working directory in the media/run directory
         base_dir = str(settings.BASE_DIR)
@@ -1446,13 +1397,6 @@ class RnaSeqRun(View):
             handle_uploaded_file(gtf_file, run_id)
         else:
             gtf_file = None
-
-        # # get gff_file and handle file
-        # if 'gff_file' in request.FILES:
-        #     gff_file = request.FILES['gff_file']
-        #     handle_uploaded_file(gff_file, run_id)
-        # else:
-        #     gff_file = None
 
         # get bed_file and handle file
         if 'bed_file' in request.FILES:
@@ -1667,7 +1611,7 @@ class RnaSeqRun(View):
                 return redirect('/run/download_' + run_id + '/')
             else:
                 result = str(result)
-                return redirect('/run/nfcore/fail_' + run_id + '_' + result + '/')
+                return redirect('/run/fail_' + run_id + '_' + result + '/')
 
 
 # class function for the nf-core Sarek pipeline
@@ -1778,7 +1722,7 @@ class SarekRun(View):
             result = str(result)
             from .tasks import create_crash_file
             create_crash_file(id_path, result)
-            return redirect('/run/nfcore/fail_' + run_id + '_' + result + '/')
+            return redirect('/run/fail_' + run_id + '_' + result + '/')
         else:
             # redirect to download page
             # return redirect('/run/nfcore/download_' + run_id + '/')

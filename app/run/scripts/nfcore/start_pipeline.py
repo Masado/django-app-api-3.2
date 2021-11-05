@@ -98,7 +98,7 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
         #'nf-core/chipseq',
         '%s' % script_location,
         # '-profile', 'docker',
-        '-profile', 'conda',
+        # '-profile', 'conda',
         '--input', '%s' % design_file
     ]
     if single_end is True:

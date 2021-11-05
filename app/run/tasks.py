@@ -41,7 +41,8 @@ def generate_and_check_sheet_id():
 
 
 def get_id_path(run_id):
-    id_path = str(settings.BASE_DIR) + "/media/run/" + run_id + "/"
+    # id_path = str(settings.BASE_DIR) + "/media/run/" + run_id + "/"
+    id_path = str(settings.MEDIA_ROOT) + "/run/" + run_id + "/"
     print("id_path: ", id_path)
     return id_path
 
@@ -77,17 +78,17 @@ def get_upload_path(run_id):
 
 
 def handle_uploaded_file(f, run_id):
-    with open(settings.MEDIA_ROOT + '/run/' + run_id + '/' + f.name, "wb+") as destination:
+    with open(str(settings.MEDIA_ROOT) + '/run/' + run_id + '/' + f.name, "wb+") as destination:
         for chunk in f.chunks():
             destination.write(chunk)
     return 0
 
 
 def handle_and_unzip(z, run_id):
-    with open(settings.MEDIA_ROOT + '/run/' + run_id + '/' + z.name, "wb+") as destination:
+    with open(str(settings.MEDIA_ROOT) + '/run/' + run_id + '/' + z.name, "wb+") as destination:
         for chunk in z.chunks():
             destination.write(chunk)
-    path = settings.MEDIA_ROOT + '/run/' + run_id + '/'
+    path = str(settings.MEDIA_ROOT) + '/run/' + run_id + '/'
     file = path + z.name
     # print('path: ', path)
     # print('file: ', file)
@@ -103,7 +104,7 @@ def handle_and_unzip(z, run_id):
 
 
 def handle_and_untar(t, run_id):
-    path = settings.MEDIA_ROOT + '/run/' + run_id + '/'
+    path = str(settings.MEDIA_ROOT) + '/run/' + run_id + '/'
     with open(path + t.name, "wb+") as destination:
         for chunk in t.chunks():
             destination.write(chunk)
@@ -160,7 +161,7 @@ def zip_file(name, target, target_2=""):
 
 
 def untar_file(t, run_id):
-    path = settings.MEDIA_ROOT + '/run/' + run_id + '/'
+    path = str(settings.MEDIA_ROOT) + '/run/' + run_id + '/'
     file = path + t.name
     command = ['tar', '-xvzf', '%s' % file, '-C', '%s' % path, '--no-same-owner']
     process = sp.run(command,
@@ -341,11 +342,11 @@ def rsync_file(
                         if items[1].strip().endswith(getout):
                             print("item: ", items[1])
                             from distutils.file_util import copy_file
-                            target_dir = settings.MEDIA_ROOT + "/run/" + run_id + "/" + items[1].strip()
+                            target_dir = str(settings.MEDIA_ROOT) + "/run/" + run_id + "/" + items[1].strip()
                             print(target_dir)
                             print("isfile: ", os.path.isfile(target_dir))
                             file_name = items[1].strip().split("/")[1]
-                            copy_file(target_dir, settings.MEDIA_ROOT + "/run/" + run_id + "/" + file_name)
+                            copy_file(target_dir, str(settings.MEDIA_ROOT) + "/run/" + run_id + "/" + file_name)
                             return file_name.strip()
 
             finished = True

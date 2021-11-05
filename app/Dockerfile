@@ -74,7 +74,56 @@ RUN wget \
     && mkdir /root/.conda \
     && bash Miniconda3-latest-Linux-x86_64.sh -b \
     && rm -f Miniconda3-latest-Linux-x86_64.sh
+
 RUN conda --version
+##############################
+## install conda environments
+RUN conda config --add channels bioconda \
+    && conda config --add channels conda-forge \
+    && conda list
+
+COPY nfscripts/nfcore/sarek_environment.yml environment.yml
+RUN conda env create -f environment.yml && \
+    conda list && \
+    rm environment.yml
+
+ENV PATH=$PATH:/root/miniconda3/envs/nf-core-sarek-2.7/bin
+RUN echo $PATH
+
+COPY nfscripts/nfcore/chipseq_atacseq_environment.yml environment.yml
+RUN conda env create -f environment.yml && \
+    conda list && \
+    rm environment.yml
+
+ENV PATH=$PATH:/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin
+RUN echo $PATH
+# test if packages are available
+RUN multiqc --help
+
+COPY nfscripts/nfcore/rnaseq_environment.yml environment.yml
+RUN conda env create -f environment.yml && \
+    conda list && \
+    rm environment.yml
+
+ENV PATH=$PATH:/root/miniconda3/envs/nf-core-rnaseq-3.1/bin
+RUN echo $PATH
+RUN multiqc --help
+
+COPY nfscripts/crispr_cas/environment.yml environment.yml
+RUN conda env create -f environment.yml && \
+    conda list && \
+    rm environment.yml
+
+ENV PATH=$PATH:/root/miniconda3/envs/crispr-cas-1.0/bin
+RUN echo $PATH
+RUN blastn -help
+###################################################
+## nf-core bins
+
+COPY ./nfscripts/nfcore/atacseq/bin /nfscripts/nfcore/atacseq/bin
+ENV PATH $PATH:/nfscripts/nfcore/atacseq/bin
+COPY ./nfscripts/nfcore/sarek/bin /nfscripts/nfcore/sarek/bin
+ENV PATH $PATH:/nfscripts/nfcore/sarek/bin
 ##############################
 ## install nextflow
 RUN curl -s https://get.nextflow.io | bash \
@@ -132,6 +181,12 @@ RUN Rscript --version
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
+
+# install R dependencies
+RUN Rscript -e "install.packages('BiocManager')"
+RUN Rscript -e "BiocManager::install('netresponse')"
+COPY ./requirements.r .
+RUN Rscript requirements.r --vanilla
 
 # copy entrypoint
 COPY ./entrypoint.sh .
