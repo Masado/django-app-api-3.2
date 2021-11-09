@@ -49,7 +49,7 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
     pipe_location = (
             base_dir + '/nfscripts/post_atacchipseq/main.nf'
     )
-    command = ['nextflow', 'run', pipe_location, '--bigwig', './bigwig/*.bigWig', '-with-dag', 'flowchart.png']
+    command = ['nextflow', 'run', pipe_location, '--bigwig', './bigwig/*.bigWig']
     if bed_file is not None:
         command.extend(['--bed', '%s' % bed_file])
     if gtf_file is not None:

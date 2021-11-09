@@ -84,7 +84,6 @@ RUN conda config --add channels bioconda \
 
 COPY nfscripts/nfcore/sarek_environment.yml environment.yml
 RUN conda env create -f environment.yml && \
-    conda list && \
     rm environment.yml
 
 ENV PATH=$PATH:/root/miniconda3/envs/nf-core-sarek-2.7/bin
@@ -92,7 +91,6 @@ RUN echo $PATH
 
 COPY nfscripts/nfcore/chipseq_atacseq_environment.yml environment.yml
 RUN conda env create -f environment.yml && \
-    conda list && \
     rm environment.yml
 
 ENV PATH=$PATH:/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin
@@ -102,7 +100,6 @@ RUN multiqc --help
 
 COPY nfscripts/nfcore/rnaseq_environment.yml environment.yml
 RUN conda env create -f environment.yml && \
-    conda list && \
     rm environment.yml
 
 ENV PATH=$PATH:/root/miniconda3/envs/nf-core-rnaseq-3.1/bin
@@ -111,7 +108,6 @@ RUN multiqc --help
 
 COPY nfscripts/crispr_cas/environment.yml environment.yml
 RUN conda env create -f environment.yml && \
-    conda list && \
     rm environment.yml
 
 ENV PATH=$PATH:/root/miniconda3/envs/crispr-cas-1.0/bin

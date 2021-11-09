@@ -35,7 +35,7 @@ def get_download_view(request, *args, **kwargs):
         # get run_id
         run_id = request.POST['run_id']
         # set path to run directory
-        path = (settings.MEDIA_ROOT + '/run/' + run_id)
+        path = (str(settings.MEDIA_ROOT) + '/run/' + run_id)
         # if the entered run_id has a corresponding run directory, redirect to the download page for the entered run_id
         if os.path.exists(path):
 
@@ -235,7 +235,7 @@ class UniversalDownloadView(View):
     def post(request, *args, **kwargs):
         run_id = kwargs['run_id']
         if "download_log" in request.POST:
-            file_path = settings.MEDIA_ROOT + '/run/' + run_id + "/" + ".nextflow.log"
+            file_path = str(settings.MEDIA_ROOT) + '/run/' + run_id + "/" + ".nextflow.log"
             return download_file(request, file_path)
         elif "download_archive" in request.POST:
             archive_form = request.POST['archive_form']
@@ -250,7 +250,10 @@ class UniversalDownloadView(View):
             elif archive_form == "tar":
                 return download_tar(request, run_id, file="results_post.tar.gz")
         elif "download_pdf" in request.POST:
-            file_path = settings.MEDIA_ROOT + '/run/' + run_id + "/" + "report.pdf"
+            file_path = str(settings.MEDIA_ROOT) + '/run/' + run_id + "/" + "report.pdf"
+            return download_file(request, file_path)
+        elif "download_flowchart" in request.POST:
+            file_path = str(settings.MEDIA_ROOT) + '/run/' + run_id + "/flowchart.png"
             return download_file(request, file_path)
 
 
@@ -1602,7 +1605,7 @@ class RnaSeqRun(View):
             # deleting progress file
             del_file([".inprogress.txt"])
 
-            clean_wd()
+            # clean_wd()
 
             # redirect to download or fail page, based on pipeline results
             if result == 0:

@@ -90,6 +90,15 @@
             <br>
         {% endif %}
 
+        {% if 'flowchart.png' in media_list %}
+            <p>If you would like a DAG to understand how the pipeline operates you can download it here:</p>
+            <form method="post">
+                {% csrf_token%}
+                <button type="submit" class="minh-80" name="download_flowchart">Download DAG</button>
+            </form>
+            <br>
+        {% endif %}
+
     {% endif %}
 
 

@@ -47,10 +47,9 @@ def rnaseq(
     scirpt_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/rnaseq/main.nf"
 
     command = ['nextflow', 'run',
-               '%s' % scirpt_location,
-               # 'nf-core/rnaseq',
-               # '-r', '3.3',
-               # '-profile', 'conda',
+               # '%s' % scirpt_location,
+               'nf-core/rnaseq',
+               '-r', '3.3',
                '--input', '%s' % csv_file, '--max_memory', '15.GB', '--max_cpus', '12']
     if umi_value is True:
         command.extend(['--with_umi', 'True', '--umitools_extract_method', '%s' % umi_method, '--umitools_bc_pattern',
@@ -63,8 +62,6 @@ def rnaseq(
         command.extend(['--fasta', '%s' % fasta_file])
     if gtf_file is not None:
         command.extend(['--gtf', '%s' % gtf_file])
-    # if gff_file is not None:
-    #     command.extend(['--gff', '%s' % gff_file])
     if bed_file is not None:
         command.extend(['--gene_bed', '%s' % bed_file])
     if transcript_fasta is not None:

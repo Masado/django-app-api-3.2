@@ -4,7 +4,7 @@ from string import ascii_uppercase, ascii_lowercase, digits
 from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect
-from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import FileSystemStorage, Storage
 from pathlib import Path
 import os
 import subprocess as sp
@@ -281,7 +281,7 @@ def get_gtf(run_id):
 
 def clean_wd():
     keepers = ['report.pdf', 'results.tar.gz', 'results.zip', 'results_post.tar.gz', 'results_post.zip',
-               '.nextflow.log', 'keeper.txt', '.completed.txt']
+               '.nextflow.log', 'keeper.txt', '.completed.txt', 'flowchart.png']
     for filename in os.listdir('.'):
         if filename not in keepers:
             if os.path.isdir(filename):
@@ -411,6 +411,13 @@ def download_file(request, file_path):
     # get file_path
     # file_path = settings.MEDIA_ROOT + '/run/' + run_id + "/" + file
     filename, file_extension = os.path.splitext(file_path)
+    file = file_path.split("/")[-1]
+    run_id = file_path.split("/")[-2]
+    print("filepath: ", file_path)
+    print("file: ", file)
+    print("filename:", filename)
+    print("file_extension:", file_extension)
+    print("run_id:", run_id)
     # download file
 
     if os.path.exists(file_path):
@@ -437,14 +444,19 @@ def download_file(request, file_path):
                 response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(
                     file_path)  # give option to download file rather than open in tab
                 return response
-
+        elif file_extension == ".png":
+            with open(file_path, 'rb') as fh:
+                response = HttpResponse(fh.read(), content_type="image/png")
+                response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(
+                    file_path)
+                return response
     raise Http404
 
 
 # download zip archive
 def download_zip(request, run_id, file):
     # get file_path
-    file_path = settings.MEDIA_ROOT + '/run/' + run_id + '/' + file
+    file_path = str(settings.MEDIA_ROOT) + '/run/' + run_id + '/' + file
     # download file
     if os.path.exists(file_path):
         with open(file_path, 'rb') as fh:
@@ -457,7 +469,7 @@ def download_zip(request, run_id, file):
 # download tar archive
 def download_tar(request, run_id, file):
     # get file_path
-    file_path = settings.MEDIA_ROOT + '/run/' + run_id + '/' + file
+    file_path = str(settings.MEDIA_ROOT) + '/run/' + run_id + '/' + file
     # download file
     if os.path.exists(file_path):
         with open(file_path, 'rb') as fh:
@@ -469,7 +481,7 @@ def download_tar(request, run_id, file):
 
 def download_tutorial(request, pipe, file):
     # get file_path
-    file_path = settings.MEDIA_ROOT + '/tutorials/' + pipe + '/' + file
+    file_path = str(settings.MEDIA_ROOT) + '/tutorials/' + pipe + '/' + file
     print('file_path: ', file_path)
     # download file
     if file[-7:] == ".tar.gz":
