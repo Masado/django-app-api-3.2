@@ -54,6 +54,7 @@ RUN apt-get update && \
       gawk \
       gzip \
       rsync \
+      cryptsetup \
     && rm -rf /var/lib/apt/lists/*
 
 # install psycopg2 dependencies
@@ -120,7 +121,7 @@ COPY ./nfscripts/nfcore/atacseq/bin /nfscripts/nfcore/atacseq/bin
 ENV PATH $PATH:/nfscripts/nfcore/atacseq/bin
 COPY ./nfscripts/nfcore/sarek/bin /nfscripts/nfcore/sarek/bin
 ENV PATH $PATH:/nfscripts/nfcore/sarek/bin
-##############################
+###################################################
 ## install nextflow
 RUN curl -s https://get.nextflow.io | bash \
     && mv nextflow /usr/local/bin \

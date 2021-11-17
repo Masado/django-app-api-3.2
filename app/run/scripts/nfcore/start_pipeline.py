@@ -90,6 +90,7 @@ def rnaseq(
 
 def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, bed_file, macs_size, narrow_peaks):
     script_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/chipseq/main.nf"
+    # script_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/chipseq/main_loc.nf"
     command = [
         'nextflow', 'run',
         #'nf-core/chipseq',
