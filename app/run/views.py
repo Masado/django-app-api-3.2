@@ -1526,9 +1526,10 @@ class RnaSeqRun(View):
         os.chdir(id_path)
 
         from datetime import datetime
-        from .tasks import today
+        print("datetime: ", datetime.now())
         run = Run(run_id=run_id, pipeline="nf-core/RNA-Seq", start_time=datetime.now())
         run.save()
+        print("run start_time: ", run.start_time)
 
         # import and run pipeline call
         from .scripts.nfcore.start_pipeline import rnaseq
