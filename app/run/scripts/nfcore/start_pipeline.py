@@ -13,7 +13,7 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
                # '%s' % script_location,
                'nf-core/atacseq',
                # '-profile', 'conda',
-               '--input', '%s' % design_file, '--max_memory', '12.GB'
+               '--input', '%s' % design_file, '--max_memory', '8.GB', '--max_cpus', '8'
                #  , '--outdir', '%s' % outdir,
                ]
     if single_end == 'true':
@@ -35,6 +35,7 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
     start_msg = "Starting ATAC-seq pipeline..."
     stop_msg = "ATAC-Seq pipeline finished successfully!"
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg)
+    result = {'exit': result, 'command': ' '.join(command)}
     return result
 
 
@@ -50,7 +51,7 @@ def rnaseq(
                # '%s' % scirpt_location,
                'nf-core/rnaseq',
                '-r', '3.3',
-               '--input', '%s' % csv_file, '--max_memory', '15.GB', '--max_cpus', '12']
+               '--input', '%s' % csv_file, '--max_memory', '8.GB', '--max_cpus', '8']
     if umi_value is True:
         command.extend(['--with_umi', 'True', '--umitools_extract_method', '%s' % umi_method, '--umitools_bc_pattern',
                         '%s' % umi_pattern])
@@ -85,6 +86,7 @@ def rnaseq(
     stop_msg = "RNA-Seq Pipeline finished successfully!"
 
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg)
+    result = {'exit': result, 'command': ' '.join(command)}
     return result
 
 
@@ -114,7 +116,7 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
     if narrow_peaks:
         command.extend(['--narrow_peak', 'True'])
 
-    command.extend(['--max_memory', '15.GB'])
+    command.extend(['--max_memory', '8.GB', '--max_cpus', '8'])
 
     print("chipseq-command:", command)
 
@@ -122,6 +124,7 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
     stop_msg = "ChIP-Seq pipeline finished successfully!"
 
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg)
+    result = {'exit': result, 'command': ' '.join(command)}
     return result
 
 
@@ -130,7 +133,7 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index):
     command = ['nextflow', 'run',
                '%s' % script_location,
                # 'nf-core/sarek',
-               '--input', '%s' % tsv_file, '--max_memory', '15.GB'
+               '--input', '%s' % tsv_file, '--max_memory', '8.GB', '--max_cpus', '8'
                # , '--skip_qc', 'bamqc,BaseRecalibrator'
                ]
     if igenome_reference is not None:
@@ -148,6 +151,7 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index):
     start_msg = "Starting Sarek pipeline..."
     stop_msg = "Sarek pipeline finished successfully!"
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg)
+    result = {'exit': result, 'command': ' '.join(command)}
     return result
 
 
@@ -161,7 +165,7 @@ def atacseq_advanced(
 ):
     command = [
         'nextflow', 'run', 'nf-core/atacseq',
-        '--max_memory', '12.GB'
+        '--max_memory', '8.GB', '--max_cpus', '8'
     ]
     if run_name is not None:
         command.extend(['-name', '%s' % run_name])

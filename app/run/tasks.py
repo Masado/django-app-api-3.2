@@ -6,9 +6,15 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect
 from django.core.files.storage import FileSystemStorage, Storage
 from pathlib import Path
+from datetime import datetime, time, date, timedelta
 import os
 import subprocess as sp
 import tarfile
+
+def today():
+    d = date.today()
+    t = time(0, 0)
+    return datetime.combine(d, t)
 
 
 def store(run_id, file):

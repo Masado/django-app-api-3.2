@@ -3,13 +3,16 @@ import zipfile
 import tarfile
 import pandas as pd
 import numpy as np
-import time
+from time import time
+from datetime import datetime, time, date, timedelta
 from django.shortcuts import render, redirect
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from django.views.generic import View
 from django.http import Http404, HttpResponse
+from django.utils import timezone
 import tarfile
+from .models import Run
 from .tasks import generate_and_check_id, check_for_run_dir, get_id_path, get_media_path, \
     create_directory, create_progress_file, clean_wd, \
     store, handle_uploaded_file, handle_and_unzip, handle_and_untar, \
@@ -358,6 +361,10 @@ class PostRNASeq(View):
 
             redirect('run/placeholder_' + run_id + '/')
 
+            from .tasks import today
+            run = Run(run_id=run_id, pipeline="Post-RNA-Seq", start_time=today())
+            run.save()
+
             # import and run pipeline call
             from .scripts.postrnaseq.start_pipeline import postrnaseq
             result = postrnaseq(organism=organism_name, species_id=species_id, samples=sample_file, salmon="salmon/",
@@ -366,6 +373,11 @@ class PostRNASeq(View):
                                 # tx2=tx2_file,
                                 pathways=pathways_number, kmin=kmin, kmax=kmax, kstep=kstep, lmin=lmin,
                                 lmax=lmax, lstep=lstep, out=out_path)
+
+            run.exit_status = result["exit"]
+            run.pipeline_command = result["command"]
+            run.save()
+            result = result["exit"]
 
             # import functions and compress results
             from .tasks import tar_file, zip_file
@@ -507,10 +519,18 @@ class PostAC(View):
 
         os.chdir(id_path)
 
-        from .scripts.postrnaseq.start_pipeline import postatacchipseq
+        from .tasks import today
+        run = Run(run_id=run_id, pipeline="Post-ATAC/ChIP-Seq")
+        run.save()
 
+        from .scripts.postrnaseq.start_pipeline import postatacchipseq
         result = postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, downstream,
                                  regions_length, ref_point, collect)
+
+        run.exit_status = result["exit"]
+        run.pipeline_command = result["command"]
+        run.save()
+        result = result["exit"]
 
         from .tasks import zip_file, tar_file
         tar_file("results.tar.gz", "results/")
@@ -661,11 +681,21 @@ class AtacSeqRun(View):
             # change to working directory
             os.chdir(id_path)
 
+            from .tasks import today
+
+            run = Run(run_id=run_id, pipeline="nf-core/ATAC-Seq", start_time=today())
+            run.save()
+
             # import and run pipeline call
             from .scripts.nfcore.start_pipeline import atacseq
             result = atacseq(script_location=script_location, design_file=str(design_file), single_end=single_end,
                              igenome_reference=igenome_reference, fasta_file=str(fasta_file),
                              gtf_annotation=str(gtf_annotation), macs_size=macs_size, narrow_peaks=narrow_peaks)
+
+            run.exit_status = result["exit"]
+            run.pipeline_command = result["command"]
+            run.save()
+            result = result["exit"]
 
             # compress results
             from .tasks import zip_file, tar_file
@@ -1200,11 +1230,20 @@ class ChipSeqRun(View):
         else:
             post_chipseq = False
 
+        from django.utils import timezone
+        run = Run(run_id=run_id, pipeline="nf-core/ChIP-Seq", start_time=timezone.now())
+        run.save()
+
         # import and run pipeline call
         from .scripts.nfcore.start_pipeline import chipseq
         result = chipseq(design_file=design_file, single_end=single_end,
                          igenome_reference=igenome_reference, fasta_file=fasta_file, gtf_file=gtf_file,
                          bed_file=bed_file, macs_size=macs_size, narrow_peaks=narrow_peaks)
+
+        run.exit_status = result["exit"]
+        run.pipeline_command = result["command"]
+        run.save()
+        result = result["exit"]
 
         # compress results
         from .tasks import zip_file, tar_file
@@ -1486,6 +1525,11 @@ class RnaSeqRun(View):
         # change to working directory
         os.chdir(id_path)
 
+        from datetime import datetime
+        from .tasks import today
+        run = Run(run_id=run_id, pipeline="nf-core/RNA-Seq", start_time=datetime.now())
+        run.save()
+
         # import and run pipeline call
         from .scripts.nfcore.start_pipeline import rnaseq
         result = rnaseq(csv_file=csv_file, umi_value=umi_value, umi_pattern=umi_pattern,
@@ -1496,6 +1540,11 @@ class RnaSeqRun(View):
                         star_index_name=star_index_name, hisat2_index_name=hisat2_index_name,
                         rsem_index_name=rsem_index_name, salmon_index_name=salmon_index_name, aligner=aligner,
                         pseudo_salmon_value=pseudo_salmon_value)
+
+        run.exit_status = result["exit"]
+        run.pipeline_command = result["command"]
+        run.save()
+        result = result["exit"]
 
         # compress results
         from .tasks import zip_file, tar_file, del_file
@@ -1703,10 +1752,19 @@ class SarekRun(View):
         # change to working directory
         os.chdir(id_path)
 
+        from .tasks import today
+        run = Run(run_id=run_id, pipeline="nf-core/Sarek", start_time=today())
+        run.save()
+
         # import and run pipeline call
         from .scripts.nfcore.start_pipeline import sarek
         result = sarek(tsv_file=tsv_file, igenome_reference=igenome_reference,
                        fasta_file=fasta_file, dbsnp=dbsnp, dbsnp_index=dbsnp_index)
+
+        run.exit_status = result["exit"]
+        run.pipeline_command = result["command"]
+        run.save()
+        result = result["exit"]
 
         # compress results
         from .tasks import zip_file, tar_file
@@ -1858,9 +1916,18 @@ class CrisprCasView(View):
         # change working directory to id_path
         os.chdir(id_path)
 
+        from .tasks import today
+        run = Run(run_id=run_id, pipeline="CrisprCas", start_time=today())
+        run.save()
+
         # import and run pipeline call
         from .scripts.postrnaseq.start_pipeline import crisprcas
         result = crisprcas(db=db_fasta, db_type=db_type, script_location=script_location)
+
+        run.exit_status = result["exit"]
+        run.pipeline_command = result["command"]
+        run.save()
+        result = result["exit"]
 
         # compress results
         from .tasks import zip_file, tar_file
