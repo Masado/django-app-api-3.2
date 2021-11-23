@@ -2,6 +2,7 @@ from django.conf import settings
 from ..tasks import run_pipe
 
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,15 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
     print("atacseq-command:", command)
     start_msg = "Starting ATAC-seq pipeline..."
     stop_msg = "ATAC-Seq pipeline finished successfully!"
-    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg)
+    
+    m_env = os.environ.copy()
+    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+	
+    print("PATH: ", m_env["PATH"])
+
+    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, 
+    	m_env=m_env
+    	)
     result = {'exit': result, 'command': ' '.join(command)}
     return result
 
@@ -51,6 +60,7 @@ def rnaseq(
                # '%s' % scirpt_location,
                'nf-core/rnaseq',
                '-r', '3.3',
+               # '-r', '3.4',
                '--input', '%s' % csv_file, '--max_memory', '8.GB', '--max_cpus', '8']
     if umi_value is True:
         command.extend(['--with_umi', 'True', '--umitools_extract_method', '%s' % umi_method, '--umitools_bc_pattern',
@@ -84,8 +94,15 @@ def rnaseq(
 
     start_msg = "Starting RNA-Seq Pipeline.."
     stop_msg = "RNA-Seq Pipeline finished successfully!"
+    
+    m_env = os.environ.copy()
+    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin:/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin"
+	
+    print("PATH: ", m_env["PATH"])
 
-    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg)
+    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, 
+    	m_env=m_env
+    	)
     result = {'exit': result, 'command': ' '.join(command)}
     return result
 
@@ -122,8 +139,14 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
 
     start_msg = "Starting ChIP-Seq pipeline.."
     stop_msg = "ChIP-Seq pipeline finished successfully!"
+    m_env = os.environ.copy()
+    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+	
+    print("PATH: ", m_env["PATH"])
 
-    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg)
+    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, 
+    	m_env=m_env
+    	)
     result = {'exit': result, 'command': ' '.join(command)}
     return result
 
@@ -150,7 +173,15 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index):
     # set start_msg, stop_msg and run pipeline
     start_msg = "Starting Sarek pipeline..."
     stop_msg = "Sarek pipeline finished successfully!"
-    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg)
+    
+    m_env = os.environ.copy()
+    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-sarek-2-7/bin:/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+	
+    print("PATH: ", m_env["PATH"])
+
+    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, 
+    	m_env=m_env
+    	)
     result = {'exit': result, 'command': ' '.join(command)}
     return result
 

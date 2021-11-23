@@ -80,8 +80,15 @@ def crisprcas(db, db_type, script_location):
                '--db_type', '%s' % db_type, '--html', '%s' % script_location]
 
     print(command)
+    
+    m_env = os.environ.copy()
+    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/crispr-cas-1.0/bin"
+	
+    print("PATH: ", m_env["PATH"])
 
     result = run_pipe(command=command, start_msg="Starting CRISRP/Cas pipeline...",
-                      stop_msg="CRISPR/Cas pipeline finished successfully!")
+                      stop_msg="CRISPR/Cas pipeline finished successfully!",
+                      m_env=m_env
+                      )
 
     return result

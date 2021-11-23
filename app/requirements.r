@@ -49,6 +49,6 @@ BiocManager::install("IRanges")
 BiocManager::install("GenomeInfoDb")
 BiocManager::install("Biobase")
 BiocManager::install("S4Vectors")
-
+library(dupRadar)
 library(SummarizedExperiment)
 

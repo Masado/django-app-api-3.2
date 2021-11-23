@@ -1,3 +1,3 @@
-FROM postgres:13
+FROM postgres:13.0-alpine
 
-ADD ./db-groundwork.sql /docker-entrypoint-initdb.d
+RUN echo "Postgres is building"

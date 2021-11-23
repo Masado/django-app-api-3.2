@@ -12,13 +12,15 @@ logger = logging.getLogger(__name__)
 
 
 def run_pipe(command, shell_bo=False, start_msg="Starting nextflow pipeline...",
-             stop_msg="pipeline finished successfully!", silent=False):
+             stop_msg="pipeline finished successfully!", silent=False, m_env=os.environ.copy()):
     print(start_msg)
+    print("PATH: ", m_env["PATH"])
     process = sp.run(command,
                      stdout=sp.PIPE,
                      stderr=sp.PIPE,
                      shell=shell_bo,
-                     universal_newlines=True
+                     universal_newlines=True,
+                     env=m_env
                      )
     if process.returncode == 0:
         if not silent:

@@ -1515,8 +1515,8 @@ class RnaSeqRun(View):
         if post_rnaseq is True:
             pseudo_salmon_value = True
 
-        if aligner == "star_salmon":
-            pseudo_salmon_value = False
+        # if aligner == "star_salmon":
+        #     pseudo_salmon_value = False
 
         print("pseudo_salmon_value: ", pseudo_salmon_value)
 
@@ -1527,7 +1527,7 @@ class RnaSeqRun(View):
 
         from datetime import datetime
         print("datetime: ", datetime.now())
-        run = Run(run_id=run_id, pipeline="nf-core/RNA-Seq", start_time=datetime.now())
+        run = Run(run_id=run_id, pipeline="nf-core/RNA-Seq")
         run.save()
         print("run start_time: ", run.start_time)
 
