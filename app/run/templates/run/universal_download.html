@@ -99,6 +99,12 @@
             <br>
         {% endif %}
 
+        <form method="post">
+            {% csrf_token %}
+            <p>You can see a more detailed description of your run here:</p>
+            <button type="submit" class="minh-80" name="detail">Detail Page</button>
+        </form>
+
     {% endif %}
 
 

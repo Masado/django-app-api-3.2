@@ -32,6 +32,7 @@ urlpatterns = [
     path('fail_<run_id>_<result>/', views.get_fail_view, name='runFail'),
     path('id_taken_<run_id>/', views.run_id_taken_view, name='idTaken'),
     path('getdownload/', views.get_download_view, name='getDownload'),
+    path('<run_id>/', views.detail_view, name='detail'),
     path('igenome/', views.igenome_view, name='iGenome'),
     path('sheets/', views.spreadsheet_view, name='Spreadsheets'),
 ]

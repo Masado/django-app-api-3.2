@@ -1,15 +1,19 @@
 from django.conf import settings
+from ...models import Run
 
 from ..tasks import run_pipe
 
 import logging
 import os
+import time
 
 logger = logging.getLogger(__name__)
 
 
 def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, organism, pathways, kmin,
-                 kmax, kstep, lmin, lmax, lstep, out):
+               kmax, kstep, lmin, lmax, lstep, out,
+               run: Run, run_id
+               ):
     from ..tasks import run_pipe
     base_dir = str(settings.BASE_DIR)
     scripts_dir = base_dir + '/nfscripts/post_rnaseq/scripts/'
@@ -37,13 +41,32 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
         command.extend(['--tx2', '%s' % salmon + 'tx2gene.csv'])
 
     print("postrnaseq-command:", command)
+
+    model_command = ' '.join(command)
+    print("model_command: ", model_command)
+    model_command = model_command.replace(
+        "/usr/src/app/nfscripts/post_rnaseq/post_rnaseq_pipeline_scripts_directory_extended_modified_testing_django_1.1.nf",
+        "post_rnaseq.nf")
+    model_command = model_command.replace("/usr/src/app/mediafiles/run/" + run_id + "/output/", "output/")
+    model_command = model_command.replace("/usr/src/app/nfscripts/post_rnaseq/scripts/", "scripts/")
+    print("model_command: ", model_command)
+    run.pipeline_command = model_command
+    run.save()
+
+    t0 = time.time()
     result = run_pipe(command=command, start_msg="Starting Post-RNA-seq pipeline...",
                       stop_msg="POST-RNA-seq pipeline finished successfully!")
+    t1 = time.time()
+    run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
+    run.exit_status = result
+    run.save()
     return result
 
 
 def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, downstream,
-                    regions_length, ref_point, collect):
+                    regions_length, ref_point, collect,
+                    run: Run
+                    ):
     from ..tasks import run_pipe
     base_dir = str(settings.BASE_DIR)
     pipe_location = (
@@ -69,26 +92,46 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
     if collect is True:
         command.extend(['--collect_heatmap'])
     print(command)
+
+    run.pipeline_command = ' '.join(command)
+    run.save()
+
+    t0 = time.time()
     result = run_pipe(command=command, start_msg="Starting Post-ATAC-Seq/ChIP-Seq pipeline...",
                       stop_msg="Post-ATAC-Seq/ChIP-Seq pipeline finished successfully!")
+    t1 = time.time()
+    run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
+
+    run.exit_status = result
+    run.save()
 
     return result
 
 
-def crisprcas(db, db_type, script_location):
+def crisprcas(db, db_type, script_location,
+              run: Run
+              ):
     command = ['nextflow', 'run', '%s' % script_location + 'main_1.1.nf', '--data', 'data', '--db', '%s' % db,
                '--db_type', '%s' % db_type, '--html', '%s' % script_location]
 
     print(command)
+
+    run.pipeline_command = ' '.join(command)
+    run.save()
     
     m_env = os.environ.copy()
     m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/crispr-cas-1.0/bin"
-	
+
     print("PATH: ", m_env["PATH"])
 
+    t0 = time.time()
     result = run_pipe(command=command, start_msg="Starting CRISRP/Cas pipeline...",
                       stop_msg="CRISPR/Cas pipeline finished successfully!",
                       m_env=m_env
                       )
+    t1 = time.time()
+    run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
+    run.exit_status = result
+    run.save()
 
     return result

@@ -7,7 +7,7 @@ from .models import Run
 
 class RunAdmin(admin.ModelAdmin):
     list_display = ['id', 'run_id', 'pipeline', 'exit_status', 'pipeline_command', 'start_time']
-    list_filter = ['id', 'pipeline', 'exit_status', 'pipeline_command', 'start_time']
+    list_filter = ['pipeline', 'exit_status']
     search_fields = ['id', 'run_id', 'pipeline', 'exit_status', 'pipeline_command', 'start_time']
 
 

@@ -1,14 +1,18 @@
 from django.conf import settings
 from ..tasks import run_pipe
+from ...models import Run
 
 import logging
 import os
+import time
 
 logger = logging.getLogger(__name__)
 
 
 def atacseq(script_location, design_file, single_end, igenome_reference, fasta_file, gtf_annotation,
-            macs_size, narrow_peaks):
+            macs_size, narrow_peaks,
+            run: Run
+            ):
     print("Starting nextflow pipeline...")
     command = ['nextflow', 'run',
                # '%s' % script_location,
@@ -33,6 +37,10 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
         command.extend(['--narrow_peak', 'True'])
 
     print("atacseq-command:", command)
+
+    run.pipeline_command = ' '.join(command)
+    run.save()
+
     start_msg = "Starting ATAC-seq pipeline..."
     stop_msg = "ATAC-Seq pipeline finished successfully!"
 
@@ -42,8 +50,12 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
 
     print("PATH: ", m_env["PATH"])
 
+    t0 = time.time()
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
-    result = {'exit': result, 'command': ' '.join(command)}
+    t1 = time.time()
+    run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
+    run.exit_status = result
+    run.save()
     return result
 
 
@@ -51,7 +63,8 @@ def rnaseq(
         csv_file, umi_value, umi_method, umi_pattern, igenome_reference, fasta_file, gtf_file,
         # gff_file,
         bed_file, transcript_fasta, star_index_name, hisat2_index_name, rsem_index_name, salmon_index_name, aligner,
-        pseudo_salmon_value
+        pseudo_salmon_value,
+        run: Run
 ):
     scirpt_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/rnaseq/main.nf"
 
@@ -91,6 +104,9 @@ def rnaseq(
 
     print("rnaseq-command:", command)
 
+    run.pipeline_command = ' '.join(command)
+    run.save()
+
     start_msg = "Starting RNA-Seq Pipeline.."
     stop_msg = "RNA-Seq Pipeline finished successfully!"
 
@@ -100,12 +116,18 @@ def rnaseq(
 
     print("PATH: ", m_env["PATH"])
 
+    t0 = time.time()
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
-    result = {'exit': result, 'command': ' '.join(command)}
+    t1 = time.time()
+    run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
+    run.exit_status = result
+    run.save()
     return result
 
 
-def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, bed_file, macs_size, narrow_peaks):
+def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, bed_file, macs_size, narrow_peaks,
+            run: Run
+            ):
     script_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/chipseq/main.nf"
     # script_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/chipseq/main_loc.nf"
     command = [
@@ -135,6 +157,9 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
 
     print("chipseq-command:", command)
 
+    run.pipeline_command = ' '.join(command)
+    run.save()
+
     start_msg = "Starting ChIP-Seq pipeline.."
     stop_msg = "ChIP-Seq pipeline finished successfully!"
     m_env = os.environ.copy()
@@ -143,12 +168,18 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
 
     print("PATH: ", m_env["PATH"])
 
+    t0 = time.time()
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
-    result = {'exit': result, 'command': ' '.join(command)}
+    t1 = time.time()
+    run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
+    run.exit_status = result
+    run.save()
     return result
 
 
-def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools):
+def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
+          run: Run
+          ):
     script_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/sarek/main.nf"
     command = ['nextflow', 'run',
                '%s' % script_location,
@@ -167,7 +198,11 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools):
         command.extend(['--fasta', '%s' % fasta_file])
     if tools != "":
         command.extend(['--tools', f'{tools}'])
+
     print("sarek-command:", command)
+
+    run.pipeline_command = ' '.join(command)
+    run.save()
 
     # set start_msg, stop_msg and run pipeline
     start_msg = "Starting Sarek pipeline..."
@@ -180,8 +215,12 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools):
 
     print("PATH: ", m_env["PATH"])
 
+    t0 = time.time()
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
-    result = {'exit': result, 'command': ' '.join(command)}
+    t1 = time.time()
+    run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
+    run.exit_status = result
+    run.save()
     return result
 
 
@@ -195,7 +234,8 @@ def atacseq_advanced(
         min_reps_consensus,
         save_macs_pileup, skip_peak_qc, skip_peak_annotation, skip_consensus_peaks, deseq2_vst, skip_diff_analysis,
         skip_fastqc,
-        skip_picard_metrics, skip_preseq, skip_plot_profile, skip_plot_fingerprint, skip_ataqv, skip_igv, skip_multiqc
+        skip_picard_metrics, skip_preseq, skip_plot_profile, skip_plot_fingerprint, skip_ataqv, skip_igv, skip_multiqc,
+        run: Run
 ):
     command = [
         'nextflow', 'run', 'nf-core/atacseq',
@@ -303,8 +343,17 @@ def atacseq_advanced(
     # print command
     print("advanced atacseq command:", command)
 
+    run.pipeline_command = ' '.join(command)
+    run.save()
+
     # set start_msg, stop_msg and run pipeline
     start_msg = "Starting advanced ATAC-Seq pipeline..."
     stop_msg = "Pipeline finished successfully!"
+
+    t0 = time.time()
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg)
+    t1 = time.time()
+    run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
+    run.exit_status = result
+    run.save()
     return result

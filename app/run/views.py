@@ -6,11 +6,10 @@ import numpy as np
 from time import time
 from datetime import datetime, time, date, timedelta
 from django.shortcuts import render, redirect
-from django.core.files.storage import FileSystemStorage
 from django.conf import settings
+from django.views import generic
 from django.views.generic import View
 from django.http import Http404, HttpResponse
-from django.utils import timezone
 import tarfile
 from .models import Run
 from .tasks import generate_and_check_id, check_for_run_dir, get_id_path, get_media_path, \
@@ -22,11 +21,26 @@ from .tasks import generate_and_check_id, check_for_run_dir, get_id_path, get_me
 
 # basic views
 def index_view(request, *args, **kwargs):
-    from .tasks import generate_and_check_id
     # generate run_id
     run_id = generate_and_check_id()
     # render the page
     return render(request, 'run/index.html', {'run_id': run_id})
+
+
+def detail_view(request, *args, **kwargs):
+    template_name = 'run/detail.html'
+    # get run_id
+    run_id = kwargs["run_id"]
+
+    try:
+        run = Run.objects.get(run_id=run_id)
+
+        context = {"run_id": run_id, "run": run}
+
+        return render(request, template_name, context)
+
+    except Run.DoesNotExist:
+        return Http404
 
 
 # redirecting views
@@ -258,6 +272,8 @@ class UniversalDownloadView(View):
         elif "download_flowchart" in request.POST:
             file_path = str(settings.MEDIA_ROOT) + '/run/' + run_id + "/flowchart.png"
             return download_file(request, file_path)
+        elif "detail" in request.POST:
+            return redirect('run:detail', run_id)
 
 
 ###########################################################
@@ -271,7 +287,6 @@ class PostRNASeq(View):
     # get function
     def get(self, request, *args, **kwargs):
         # set variables
-        from .tasks import generate_and_check_id
         run_id = generate_and_check_id()
 
         # render pipeline page
@@ -372,12 +387,8 @@ class PostRNASeq(View):
                                 annotation_file=annotation_file, network=network_file,
                                 # tx2=tx2_file,
                                 pathways=pathways_number, kmin=kmin, kmax=kmax, kstep=kstep, lmin=lmin,
-                                lmax=lmax, lstep=lstep, out=out_path)
-
-            run.exit_status = result["exit"]
-            run.pipeline_command = result["command"]
-            run.save()
-            result = result["exit"]
+                                lmax=lmax, lstep=lstep, out=out_path,
+                                run=run, run_id=run_id)
 
             # import functions and compress results
             from .tasks import tar_file, zip_file
@@ -431,7 +442,6 @@ class PostAC(View):
 
     def get(self, request, *args, **kwargs):
         # set variables
-        from .tasks import generate_and_check_id
         run_id = generate_and_check_id()
 
         # render pipeline page
@@ -525,12 +535,8 @@ class PostAC(View):
 
         from .scripts.postrnaseq.start_pipeline import postatacchipseq
         result = postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, downstream,
-                                 regions_length, ref_point, collect)
-
-        run.exit_status = result["exit"]
-        run.pipeline_command = result["command"]
-        run.save()
-        result = result["exit"]
+                                 regions_length, ref_point, collect,
+                                 run=run)
 
         from .tasks import zip_file, tar_file
         tar_file("results.tar.gz", "results/")
@@ -581,8 +587,6 @@ class AtacSeqRun(View):
     # get function
     def get(self, request, *args, **kwargs):
         # set variables
-        # run_id = kwargs['run_id']
-        from .tasks import generate_and_check_id
         run_id = generate_and_check_id()
 
         # render pipeline page
@@ -690,12 +694,8 @@ class AtacSeqRun(View):
             from .scripts.nfcore.start_pipeline import atacseq
             result = atacseq(script_location=script_location, design_file=str(design_file), single_end=single_end,
                              igenome_reference=igenome_reference, fasta_file=str(fasta_file),
-                             gtf_annotation=str(gtf_annotation), macs_size=macs_size, narrow_peaks=narrow_peaks)
-
-            run.exit_status = result["exit"]
-            run.pipeline_command = result["command"]
-            run.save()
-            result = result["exit"]
+                             gtf_annotation=str(gtf_annotation), macs_size=macs_size, narrow_peaks=narrow_peaks,
+                             run=run)
 
             # compress results
             from .tasks import zip_file, tar_file
@@ -765,11 +765,15 @@ class AtacSeqRun(View):
                     filelist = ["results", "work"]
                     del_file(filelist)
 
+                    run = Run(run_id=run_id + "_p", pipeline="Post-RNA-Seq", start_time=datetime.now())
+                    run.save()
+
                     from .scripts.postrnaseq.start_pipeline import postatacchipseq
                     result = postatacchipseq(bed_file=post_bed_file, gtf_file=post_annotation_file, ext_chr=ext_chr,
                                              computation_method=computation_method, upstream=upstream,
                                              downstream=downstream, regions_length=regions_length, ref_point=ref_point,
-                                             collect=collect)
+                                             collect=collect,
+                                             run=run)
 
                     # import functions and compress results
                     from .tasks import zip_file, tar_file
@@ -1088,6 +1092,9 @@ class AtacSeqRun(View):
 
             os.chdir(id_path)
 
+            run = Run(run_id=run_id, pipeline="nf-core/ATAC-Seq", start_time=datetime.now())
+            run.save()
+
             # import and run pipeline call
             from .scripts.nfcore.start_pipeline import atacseq_advanced
             result = atacseq_advanced(run_name, config_file, design_file, single_end, fragment_size, seq_center, email,
@@ -1099,7 +1106,8 @@ class AtacSeqRun(View):
                                       min_reps_consensus, save_macs_pileup, skip_peak_qc, skip_peak_annotation,
                                       skip_consensus_peaks, deseq2_vst, skip_diff_analysis, skip_fastqc,
                                       skip_picard_metrics, skip_preseq, skip_plot_profile, skip_plot_fingerprint,
-                                      skip_ataqv, skip_igv, skip_multiqc)
+                                      skip_ataqv, skip_igv, skip_multiqc,
+                                      run=run)
 
             # compress results
             from .tasks import zip_file, tar_file
@@ -1131,8 +1139,6 @@ class ChipSeqRun(View):
     # get function
     def get(self, request, *args, **kwargs):
         # set run_id
-        # run_id = kwargs['run_id']
-        from .tasks import generate_and_check_id
         run_id = generate_and_check_id()
 
         # render pipeline page
@@ -1238,12 +1244,8 @@ class ChipSeqRun(View):
         from .scripts.nfcore.start_pipeline import chipseq
         result = chipseq(design_file=design_file, single_end=single_end,
                          igenome_reference=igenome_reference, fasta_file=fasta_file, gtf_file=gtf_file,
-                         bed_file=bed_file, macs_size=macs_size, narrow_peaks=narrow_peaks)
-
-        run.exit_status = result["exit"]
-        run.pipeline_command = result["command"]
-        run.save()
-        result = result["exit"]
+                         bed_file=bed_file, macs_size=macs_size, narrow_peaks=narrow_peaks,
+                         run=run)
 
         # compress results
         from .tasks import zip_file, tar_file
@@ -1318,11 +1320,15 @@ class ChipSeqRun(View):
                 filelist = ["results", "work"]
                 del_file(filelist)
 
+                run = Run(run_id=run_id + "_p", pipeline="Post-ATAC-Seq", start_time=timezone.now())
+                run.save()
+
                 from .scripts.postrnaseq.start_pipeline import postatacchipseq
                 result = postatacchipseq(bed_file=post_bed_file, gtf_file=post_annotation_file, ext_chr=ext_chr,
                                          computation_method=computation_method, upstream=upstream,
                                          downstream=downstream, regions_length=regions_length, ref_point=ref_point,
-                                         collect=collect)
+                                         collect=collect,
+                                         run=run)
 
                 # import functions and compress results
                 from .tasks import zip_file, tar_file
@@ -1366,8 +1372,6 @@ class RnaSeqRun(View):
     # get function
     def get(self, request, *args, **kwargs):
         # set run_id
-        # run_id = kwargs['run_id']
-        from .tasks import generate_and_check_id
         run_id = generate_and_check_id()
 
         # render pipeline page
@@ -1540,12 +1544,8 @@ class RnaSeqRun(View):
                         bed_file=bed_file, transcript_fasta=transcript_fasta,
                         star_index_name=star_index_name, hisat2_index_name=hisat2_index_name,
                         rsem_index_name=rsem_index_name, salmon_index_name=salmon_index_name, aligner=aligner,
-                        pseudo_salmon_value=pseudo_salmon_value)
-
-        run.exit_status = result["exit"]
-        run.pipeline_command = result["command"]
-        run.save()
-        result = result["exit"]
+                        pseudo_salmon_value=pseudo_salmon_value,
+                        run=run)
 
         # compress results
         from .tasks import zip_file, tar_file, del_file
@@ -1625,12 +1625,15 @@ class RnaSeqRun(View):
                 file_list = ["results", "work"]
                 del_file(file_list)
 
+                run = Run(run_id=run_id + "_p", pipeline="Post-RNA-Seq")
+
                 # import and run post_rnaseq
                 from .scripts.postrnaseq.start_pipeline import postrnaseq
                 result = postrnaseq(samples=sample_file, salmon=salmon_file, compare=compare_tsv_file,
-                                      annotation_file=annotation_file, network=network_file, species_id=species_id,
-                                      organism=organism_name, pathways=pathways_number, kmin=kmin, kmax=kmax,
-                                      kstep=kstep, lmin=lmin, lmax=lmax, lstep=lstep, out=out_path)
+                                    annotation_file=annotation_file, network=network_file, species_id=species_id,
+                                    organism=organism_name, pathways=pathways_number, kmin=kmin, kmax=kmax,
+                                    kstep=kstep, lmin=lmin, lmax=lmax, lstep=lstep, out=out_path,
+                                    run=run)
 
                 # import functions and compress results
                 from .tasks import tar_file, zip_file
@@ -1675,8 +1678,6 @@ class SarekRun(View):
     # get functions
     def get(self, request, *args, **kwargs):
         # set run_id
-        # run_id = kwargs['run_id']
-        from .tasks import generate_and_check_id
         run_id = generate_and_check_id()
 
         # render pipeline page
@@ -1763,19 +1764,15 @@ class SarekRun(View):
         os.chdir(id_path)
 
         from .tasks import today
-        run = Run(run_id=run_id, pipeline="nf-core/Sarek", start_time=today())
+        run = Run(run_id=run_id, pipeline="nf-core/Sarek")
         run.save()
 
         # import and run pipeline call
         from .scripts.nfcore.start_pipeline import sarek
         result = sarek(tsv_file=tsv_file, igenome_reference=igenome_reference,
                        fasta_file=fasta_file, dbsnp=dbsnp, dbsnp_index=dbsnp_index,
-                       tools=tools)
-
-        run.exit_status = result["exit"]
-        run.pipeline_command = result["command"]
-        run.save()
-        result = result["exit"]
+                       tools=tools,
+                       run=run)
 
         # compress results
         from .tasks import zip_file, tar_file
@@ -1882,8 +1879,6 @@ class CrisprCasView(View):
     # get function
     def get(self, request, *args, **kwargs):
         # get run_id
-        # run_id = str(kwargs['run_id'])
-        from .tasks import generate_and_check_id
         run_id = generate_and_check_id()
 
         # render page
@@ -1933,12 +1928,8 @@ class CrisprCasView(View):
 
         # import and run pipeline call
         from .scripts.postrnaseq.start_pipeline import crisprcas
-        result = crisprcas(db=db_fasta, db_type=db_type, script_location=script_location)
-
-        run.exit_status = result["exit"]
-        run.pipeline_command = result["command"]
-        run.save()
-        result = result["exit"]
+        result = crisprcas(db=db_fasta, db_type=db_type, script_location=script_location,
+                           run=run)
 
         # compress results
         from .tasks import zip_file, tar_file
