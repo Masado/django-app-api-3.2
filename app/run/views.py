@@ -32,15 +32,11 @@ def detail_view(request, *args, **kwargs):
     # get run_id
     run_id = kwargs["run_id"]
 
-    try:
-        run = Run.objects.get(run_id=run_id)
+    run = Run.objects.get(run_id=run_id)
 
-        context = {"run_id": run_id, "run": run}
+    context = {"run_id": run_id, "run": run}
 
-        return render(request, template_name, context)
-
-    except Run.DoesNotExist:
-        return Http404
+    return render(request, template_name, context)
 
 
 # redirecting views
@@ -1818,6 +1814,7 @@ class RNASeqTutorial(View):
             elif request.POST['archive_form'] == "tar":
                 return download_tutorial(request, pipe="rnaseq", file="rnaseq.tar.gz")
 
+
 # ChIP-Seq tutorial
 class ChIPSeqTutorial(View):
     template_name = "run/tutorial_nf_chipseq.html"
@@ -1966,6 +1963,5 @@ class CrisprCasTutorial(View):
                 return download_tutorial(request, pipe="crisprcas", file="crisprcas.zip")
             elif request.POST['archive_form'] == "tar":
                 return download_tutorial(request, pipe="crisprcas", file="crisprcas.tar.gz")
-
 
 #######################################################
