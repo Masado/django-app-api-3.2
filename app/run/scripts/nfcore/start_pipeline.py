@@ -35,15 +35,14 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
     print("atacseq-command:", command)
     start_msg = "Starting ATAC-seq pipeline..."
     stop_msg = "ATAC-Seq pipeline finished successfully!"
-    
+
     m_env = os.environ.copy()
-    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
-	
+    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:" \
+                                    ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+
     print("PATH: ", m_env["PATH"])
 
-    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, 
-    	m_env=m_env
-    	)
+    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
     result = {'exit': result, 'command': ' '.join(command)}
     return result
 
@@ -94,15 +93,14 @@ def rnaseq(
 
     start_msg = "Starting RNA-Seq Pipeline.."
     stop_msg = "RNA-Seq Pipeline finished successfully!"
-    
+
     m_env = os.environ.copy()
-    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin:/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin"
-	
+    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin" \
+                                    ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin"
+
     print("PATH: ", m_env["PATH"])
 
-    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, 
-    	m_env=m_env
-    	)
+    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
     result = {'exit': result, 'command': ' '.join(command)}
     return result
 
@@ -112,7 +110,7 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
     # script_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/chipseq/main_loc.nf"
     command = [
         'nextflow', 'run',
-        #'nf-core/chipseq',
+        # 'nf-core/chipseq',
         '%s' % script_location,
         # '-profile', 'docker',
         # '-profile', 'conda',
@@ -140,18 +138,17 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
     start_msg = "Starting ChIP-Seq pipeline.."
     stop_msg = "ChIP-Seq pipeline finished successfully!"
     m_env = os.environ.copy()
-    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
-	
+    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:"\
+                                    ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+
     print("PATH: ", m_env["PATH"])
 
-    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, 
-    	m_env=m_env
-    	)
+    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
     result = {'exit': result, 'command': ' '.join(command)}
     return result
 
 
-def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index):
+def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools):
     script_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/sarek/main.nf"
     command = ['nextflow', 'run',
                '%s' % script_location,
@@ -168,31 +165,37 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index):
         command.extend(['--skip_qc', 'BaseRecalibrator'])
     if fasta_file is not None:
         command.extend(['--fasta', '%s' % fasta_file])
+    if tools != "":
+        command.extend(['--tools', f'{tools}'])
     print("sarek-command:", command)
 
     # set start_msg, stop_msg and run pipeline
     start_msg = "Starting Sarek pipeline..."
     stop_msg = "Sarek pipeline finished successfully!"
-    
+
     m_env = os.environ.copy()
-    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-sarek-2-7/bin:/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
-	
+    m_env["PATH"] = "/root/miniconda3/envs/nf-core-sarek-2.7/bin:" + m_env["PATH"]  # + \
+    # ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin" \
+    # ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+
     print("PATH: ", m_env["PATH"])
 
-    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, 
-    	m_env=m_env
-    	)
+    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
     result = {'exit': result, 'command': ' '.join(command)}
     return result
 
 
 def atacseq_advanced(
-    run_name, config_file, design_file, single_end, fragment_size, seq_center, email, genome_reference, fasta_file,
-    gtf_annotation, bwa_index_name, gene_bed, tss_bed, macs_gsize, blacklist, mito_name, save_reference, clip_r1, clip_r2,
-    three_prime_clip_r1, three_prime_clip_r2, trim_nextseq, skip_trimming, save_trimmed, keep_mito, keep_dups, keep_multi_map,
-    bwa_min_score, skip_merge_replicates, save_align_intermeds, narrow_peak, broad_cutoff, macs_fdr, macs_pvalue, min_reps_consensus,
-    save_macs_pileup, skip_peak_qc, skip_peak_annotation, skip_consensus_peaks, deseq2_vst, skip_diff_analysis, skip_fastqc,
-    skip_picard_metrics, skip_preseq, skip_plot_profile, skip_plot_fingerprint, skip_ataqv, skip_igv, skip_multiqc
+        run_name, config_file, design_file, single_end, fragment_size, seq_center, email, genome_reference, fasta_file,
+        gtf_annotation, bwa_index_name, gene_bed, tss_bed, macs_gsize, blacklist, mito_name, save_reference, clip_r1,
+        clip_r2,
+        three_prime_clip_r1, three_prime_clip_r2, trim_nextseq, skip_trimming, save_trimmed, keep_mito, keep_dups,
+        keep_multi_map,
+        bwa_min_score, skip_merge_replicates, save_align_intermeds, narrow_peak, broad_cutoff, macs_fdr, macs_pvalue,
+        min_reps_consensus,
+        save_macs_pileup, skip_peak_qc, skip_peak_annotation, skip_consensus_peaks, deseq2_vst, skip_diff_analysis,
+        skip_fastqc,
+        skip_picard_metrics, skip_preseq, skip_plot_profile, skip_plot_fingerprint, skip_ataqv, skip_igv, skip_multiqc
 ):
     command = [
         'nextflow', 'run', 'nf-core/atacseq',

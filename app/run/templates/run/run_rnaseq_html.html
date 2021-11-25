@@ -356,6 +356,11 @@
                 </td>
             </tr>
             <tr>
+                <td class="noBorder" colspan="3"><em><small>A tool to help you create the input spreadsheet file can be
+                    found
+                    <a href="http://localhost:8000/run/sheets/" target="_blank">here</a>.</small></em></td>
+            </tr>
+            <tr>
                 <td class="noBorder"><label id="id_file_folder" class="float-right">File folder:</label></td>
                 <td class="noBorder"><input id="id_file_folder" type="file" accept=".zip, .tar.gz" name="file_folder">
                 </td>
@@ -605,15 +610,15 @@
                                             title="Please type in the scientific name of the species you obtained your samples from. eg.:'Gallus gallus'">
                 </td>
             </tr>
-{#            <tr>#}
-{#                <td class="noBorder"><label for="id_species_id" class="float-right">Taxonomy ID:</label></td>#}
-{#                <td class="noBorder">#}
-{#                    <input id="id_species_id" type="number" class="text-like" name="species_id" placeholder="9031">#}
-{#                </td>#}
-{#                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"#}
-{#                                            title="Please enter the Taxonomy ID. e.g: 9031 for Gallus gallus">#}
-{#                </td>#}
-{#            </tr>#}
+            {#            <tr>#}
+            {#                <td class="noBorder"><label for="id_species_id" class="float-right">Taxonomy ID:</label></td>#}
+            {#                <td class="noBorder">#}
+            {#                    <input id="id_species_id" type="number" class="text-like" name="species_id" placeholder="9031">#}
+            {#                </td>#}
+            {#                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"#}
+            {#                                            title="Please enter the Taxonomy ID. e.g: 9031 for Gallus gallus">#}
+            {#                </td>#}
+            {#            </tr>#}
             <tr>
                 <td class="noBorder"><label for="id_sample_file" class="float-right">Sample file: </label></td>
                 <td class="noBorder">
@@ -749,7 +754,7 @@
             // get tbody
             const tbody = document.getElementById("id_reference_genome_options");
 
-            if (checkbox.checked === true){
+            if (checkbox.checked === true) {
                 tbody.style.display = "";
             } else {
                 tbody.style.display = "none";

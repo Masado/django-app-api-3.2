@@ -104,15 +104,6 @@
             </table>
 
             <br>
-{#            <div class="inline-group">#}
-{#                <button type="button" onclick="add_row()">Add row</button>#}
-{#                <button type="button" class="ml-4" onclick="remove_row()">Remove row</button>#}
-{#            </div>#}
-{#            <div id="id_sarek_buttons" style="display: none">#}
-{#                <br>#}
-{#                <button type="button" onclick="add_col()">Add column</button>#}
-{#                <button type="button" class="ml-4" onclick="remove_col()">Remove column</button>#}
-{#            </div>#}
             <input id="id_rows" name="rows" type="number" value="0" hidden>
             <input id="id_cols" name="cols" type="number" value="0" hidden>
             <br>
@@ -159,7 +150,6 @@
                 for (let c = 0; c < colNum; c++) {
                     let cell = row.insertCell(c);
                     cell.innerHTML = '<input id="id_r' + rowNum + '_c' + c + '" name="r' + rowNum + '_c' + c + '" type="text">'
-                    {#cell.contentEditable = "true";#}
                 }
             }
         }
@@ -172,11 +162,9 @@
             colSelector.value ++
 
             tb.querySelectorAll("tr").forEach(Row => {
-                {#let rowNum = tb.querySelectorAll("tr").length;#}
                 let rowNum = Row.rowIndex;
                 const cell = Row.insertCell();
                 cell.innerHTML = '<input id="id_r' + rowNum + '_c' + colNum + '" name="r' + rowNum + '_c' + colNum + '" type="text">'
-                {#cell.contentEditable = "true";#}
             })
 
         }
@@ -224,6 +212,7 @@
                         const cell = row.insertCell();
                         txt = list[x]
                         cell.innerHTML = "<b>" + txt + "</b>";
+                        cell.style.padding = "10px";
                     }
                 }
                 if (value === "atac_design") {
@@ -235,6 +224,7 @@
                         const cell = row.insertCell();
                         txt = list[x]
                         cell.innerHTML = "<b>" + txt + "</b>";
+                        cell.style.padding = "10px";
                     }
                 }
                 if (value === "chip_design") {
@@ -246,6 +236,7 @@
                         const cell = row.insertCell();
                         txt = list[x]
                         cell.innerHTML = "<b>" + txt + "</b>";
+                        cell.style.padding = "10px";
                     }
                 }
                 if (value === "sarek_input") {

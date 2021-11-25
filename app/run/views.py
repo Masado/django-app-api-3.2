@@ -1729,6 +1729,15 @@ class SarekRun(View):
             igenome_reference = None
             print("igenome_reference is None")
 
+        # get variant calling tools
+        tools_list = ["FreeBayes", "HaplotypeCallers", "Manta", "mpileup", "Strelka", "TIDDIT", "ASCAT",
+                      "Control-FREEC", "MSIsensor", "MUTECT2", "snpEff", "VEP"]
+        tools = ""
+        for tool in tools_list:
+            if tool in request.POST:
+                tools = tools + f"{tool},"
+        print("tools: ", tools)
+
         # get fasta_file and handle file
         if 'fasta_file' in request.FILES:
             fasta_file = request.FILES['fasta_file']
@@ -1760,7 +1769,8 @@ class SarekRun(View):
         # import and run pipeline call
         from .scripts.nfcore.start_pipeline import sarek
         result = sarek(tsv_file=tsv_file, igenome_reference=igenome_reference,
-                       fasta_file=fasta_file, dbsnp=dbsnp, dbsnp_index=dbsnp_index)
+                       fasta_file=fasta_file, dbsnp=dbsnp, dbsnp_index=dbsnp_index,
+                       tools=tools)
 
         run.exit_status = result["exit"]
         run.pipeline_command = result["command"]
