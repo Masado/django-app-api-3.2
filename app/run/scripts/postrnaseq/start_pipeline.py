@@ -120,7 +120,10 @@ def crisprcas(db, db_type, script_location,
     run.save()
     
     m_env = os.environ.copy()
-    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/crispr-cas-1.0/bin"
+    if bool(settings.DEBUG):
+        m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/crispr-cas-1.0/bin"
+    else:
+        m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/crispr-cas-1.0/bin"
 
     print("PATH: ", m_env["PATH"])
 

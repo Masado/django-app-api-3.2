@@ -45,8 +45,12 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
     stop_msg = "ATAC-Seq pipeline finished successfully!"
 
     m_env = os.environ.copy()
-    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:" \
-                                    ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+    if bool(settings.DEBUG):
+        m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:" \
+                                        ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+    else:
+        m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:" \
+                                        ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin"
 
     print("PATH: ", m_env["PATH"])
 
@@ -111,14 +115,19 @@ def rnaseq(
     stop_msg = "RNA-Seq Pipeline finished successfully!"
 
     m_env = os.environ.copy()
-    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin" \
-                                    ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin"
+    if bool(settings.DEBUG):
+        m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin" \
+                                        ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin"
+    else:
+        m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin" \
+                                        ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin"
 
     print("PATH: ", m_env["PATH"])
 
     t0 = time.time()
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
     t1 = time.time()
+    print("result: ", result)
     run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
     run.exit_status = result
     run.save()
@@ -163,8 +172,13 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
     start_msg = "Starting ChIP-Seq pipeline.."
     stop_msg = "ChIP-Seq pipeline finished successfully!"
     m_env = os.environ.copy()
-    m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:"\
-                                    ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+
+    if bool(settings.DEBUG):
+        m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:"\
+                                        ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+    else:
+        m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:" \
+                                        ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin"
 
     print("PATH: ", m_env["PATH"])
 
@@ -209,9 +223,12 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
     stop_msg = "Sarek pipeline finished successfully!"
 
     m_env = os.environ.copy()
-    m_env["PATH"] = "/root/miniconda3/envs/nf-core-sarek-2.7/bin:" + m_env["PATH"]  # + \
-    # ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin" \
-    # ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+    if bool(settings.DEBUG):
+        m_env["PATH"] = "/root/miniconda3/envs/nf-core-sarek-2.7/bin:" + m_env["PATH"]  # + \
+        # ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin" \
+        # ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+    else:
+        m_env["PATH"] = "/home/app/miniconda3/envs/nf-core-sarek-2.7/bin:" + m_env["PATH"]
 
     print("PATH: ", m_env["PATH"])
 
@@ -350,8 +367,18 @@ def atacseq_advanced(
     start_msg = "Starting advanced ATAC-Seq pipeline..."
     stop_msg = "Pipeline finished successfully!"
 
+    m_env = os.environ.copy()
+    if bool(settings.DEBUG):
+        m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:" \
+                                        ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+    else:
+        m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:" \
+                                        ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+
+    print("PATH: ", m_env["PATH"])
+
     t0 = time.time()
-    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg)
+    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
     t1 = time.time()
     run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
     run.exit_status = result
