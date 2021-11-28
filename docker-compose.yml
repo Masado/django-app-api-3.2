@@ -15,11 +15,11 @@ services:
   db_dev:
     image: postgres:13.0-alpine
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data_dev:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=next_django
       - POSTGRES_PASSWORD=next_django
       - POSTGRES_DB=next_django_dev
 
 volumes:
-  postgres_data:
+  postgres_data_dev:
