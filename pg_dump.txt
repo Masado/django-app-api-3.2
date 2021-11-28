@@ -1,2 +1,3 @@
 docker-compose exec db pg_dump -U next_django next_django_dev > db-backup-$(date +%y-%m-%d).sql
 
+docker-compose exec -T db psql -U next_django next_django_dev < db-groundwork.sql

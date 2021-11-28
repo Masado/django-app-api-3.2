@@ -35,3 +35,5 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
+
+#  --timeout=18000 --workers=27

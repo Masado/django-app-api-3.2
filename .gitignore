@@ -136,5 +136,8 @@ dmypy.json
 app/mediafiles/spreadsheets
 app/mediafiles/run
 
+# database backups
+db/db-backup-*.sql
+
 # pycharm files
 .idea/

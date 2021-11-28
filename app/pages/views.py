@@ -8,6 +8,7 @@ def home_view(request, *args, **kwargs):
     print(args, kwargs)
     # print(request.user)
     print(datetime.datetime.now())
+
     return render(request, 'home.html', {})
 
 
