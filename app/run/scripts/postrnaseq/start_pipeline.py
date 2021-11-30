@@ -23,6 +23,7 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
     )
     command = ['nextflow', 'run',
                pipe_location,
+               '-with-dag', 'flowchart.pdf',
                '--samples', '%s' % samples, '--salmon', '%s' % salmon, '--compare', '%s' % compare,
                '--annotation', '%s' % annotation_file, '--network',
                '%s' % network, '--scripts', scripts_dir,
@@ -65,14 +66,17 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
 
 def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, downstream,
                     regions_length, ref_point, collect,
+                    bam_archive,
                     run: Run
                     ):
     from ..tasks import run_pipe
     base_dir = str(settings.BASE_DIR)
     pipe_location = (
-            base_dir + '/nfscripts/post_atacchipseq/main.nf'
+            base_dir + '/nfscripts/post_atacchipseq/main_1.1.nf'
     )
-    command = ['nextflow', 'run', pipe_location, '--bigwig', './bigwig/*.bigWig']
+    command = ['nextflow', 'run', pipe_location, '--bigwig', './bigwig/*.bigWig',
+               '-with-dag', 'postacseq_flowchart.png'
+               ]
     if bed_file is not None:
         command.extend(['--bed', '%s' % bed_file])
     if gtf_file is not None:
@@ -91,14 +95,27 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
         command.extend(['--reference_point', '%s' % ref_point])
     if collect is True:
         command.extend(['--collect_heatmap'])
+    if bam_archive is not None:
+        command.extend(['--bam', 'bam/'])
     print(command)
 
     run.pipeline_command = ' '.join(command)
     run.save()
 
+    m_env = os.environ.copy()
+
+    if bool(settings.DEBUG):
+        m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:"\
+                                        ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+    else:
+        m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:" \
+                                        ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin"
+
+    print("PATH: ", m_env["PATH"])
+
     t0 = time.time()
     result = run_pipe(command=command, start_msg="Starting Post-ATAC-Seq/ChIP-Seq pipeline...",
-                      stop_msg="Post-ATAC-Seq/ChIP-Seq pipeline finished successfully!")
+                      stop_msg="Post-ATAC-Seq/ChIP-Seq pipeline finished successfully!", m_env=m_env)
     t1 = time.time()
     run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
 

@@ -395,7 +395,7 @@ class PostRNASeq(View):
             # deleting progress file
             del_file([".inprogress.txt"])
 
-            clean_wd()
+            # clean_wd()
 
             # redirect to download- or fail-page, based on results
             if result != 0:
@@ -445,7 +445,7 @@ class PostAC(View):
 
     @staticmethod
     def post(request, *args, **kwargs):
-        t_start = time.time()
+        # t_start = time()
         # set variables
         # run_id = kwargs["run_id"]
         run_id = request.POST["run_id"]
@@ -488,6 +488,15 @@ class PostAC(View):
                 handle_and_unzip(bw_archive, run_id)
             elif bw_archive.name[-7:] == ".tar.gz":
                 handle_and_untar(bw_archive, run_id)
+
+        if 'bam_archive' in request.FILES:
+            bam_archive = request.FILES['bam_archive']
+            if bam_archive.name[-4:] == ".zip":
+                handle_and_unzip(bam_archive, run_id)
+            elif bam_archive.name[-7:] == ".tar.gz":
+                handle_and_untar(bam_archive, run_id)
+        else:
+            bam_archive = None
 
         if 'ext_chr' in request.POST:
             ext_chr = request.POST['ext_chr']
@@ -532,6 +541,7 @@ class PostAC(View):
         from .scripts.postrnaseq.start_pipeline import postatacchipseq
         result = postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, downstream,
                                  regions_length, ref_point, collect,
+                                 bam_archive,
                                  run=run)
 
         from .tasks import zip_file, tar_file
@@ -542,10 +552,10 @@ class PostAC(View):
         # deleting progress file
         del_file([".inprogress.txt"])
 
-        clean_wd()
+        # clean_wd()
 
-        t_end = time.time()
-        print("time elapsed: ", t_end - t_start)
+        # t_end = time.time()
+        # print("time elapsed: ", t_end - t_start)
 
         if result == 0:
             return redirect('/run/download_' + run_id + '/')

@@ -55,6 +55,7 @@ RUN apt-get update && \
       gzip \
       rsync \
       cryptsetup \
+      graphviz \
     && rm -rf /var/lib/apt/lists/*
 
 # install psycopg2 dependencies
@@ -192,6 +193,9 @@ RUN chmod +x /usr/src/app/entrypoint.sh
 
 # copy project
 COPY . .
+
+# setup NCBI database
+RUN python ncbi_setup.py
 
 # run entrypoint.sh
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]

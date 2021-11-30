@@ -288,7 +288,7 @@ def get_gtf(run_id):
 
 def clean_wd():
     keepers = ['report.pdf', 'results.tar.gz', 'results.zip', 'results_post.tar.gz', 'results_post.zip',
-               '.nextflow.log', 'keeper.txt', '.completed.txt', 'flowchart.png']
+               '.nextflow.log', 'keeper.txt', '.completed.txt', 'flowchart.pdf']
     for filename in os.listdir('.'):
         if filename not in keepers:
             if os.path.isdir(filename):

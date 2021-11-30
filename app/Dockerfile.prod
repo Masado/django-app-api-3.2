@@ -104,6 +104,7 @@ RUN apt-get update && \
       gzip \
       rsync \
       cryptsetup \
+      graphviz \
     && rm -rf /var/lib/apt/lists/*
 
 # install psycopg2 dependencies
@@ -251,6 +252,9 @@ RUN chmod +x  $APP_HOME/entrypoint.prod.sh
 
 # copy project
 COPY . $APP_HOME
+
+# setup NCBI database
+RUN python ncbi_setup.py
 
 # chown all the files to the app user
 RUN chown -R app:app $APP_HOME
