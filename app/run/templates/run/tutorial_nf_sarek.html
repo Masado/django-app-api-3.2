@@ -94,6 +94,73 @@
 
     <p>
     <figure>
+        <img src="{% static 'images/tutorials/sarek/sarek_tools.png' %}" alt="Sarek tools">
+        <figcaption><small>
+            Sarek allows for the selection of a many tools for variant calling and annotation. Tools focus on different
+            variants they focus on and you are allowed to select one or more. The same is true for the annotation tools.
+            <table>
+                <thead>
+                <th>Tool</th>
+                <th>Somatic/Germline</th>
+                <th>Focus</th>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Manta</td>
+                    <td>Germline & Somatic</td>
+                    <td>structural variants, medium-sized indels, large insertions</td>
+                </tr>
+                <tr>
+                    <td>TIDDIT</td>
+                    <td>Germline & Somatic</td>
+                    <td>translocations, deletions, tandem-duplications, inversions</td>
+                </tr>
+                <tr>
+                    <td>GATK Mutect2</td>
+                    <td>Somatic</td>
+                    <td>SNVs, indels</td>
+                </tr>
+                <tr>
+                    <td>GATK HaplotypeCaller</td>
+                    <td>Germline</td>
+                    <td>SNVs, indels</td>
+                </tr>
+                <tr>
+                    <td>Strelka2</td>
+                    <td>Germline & Somatic</td>
+                    <td>G: small cohort variations, S: small tumor/normal read-pair variation</td>
+                </tr>
+                <tr>
+                    <td>MSIsensor</td>
+                    <td>Germline & Somatic</td>
+                    <td>microsatellite instability in tumor/normal read-pairs</td>
+                </tr>
+                <tr>
+                    <td>ASCAT</td>
+                    <td>Somatic</td>
+                    <td>tumor ploidy, gains, losses and copy events of tumors</td>
+                </tr>
+                <tr>
+                    <td>FreeBayes</td>
+                    <td>Germline</td>
+                    <td>small SNPs, indels, MNPs</td>
+                </tr>
+                <tr>
+                    <td>Control-FREEC</td>
+                    <td>Somatic</td>
+                    <td>copy-number changes and allelic imbalances of tumors</td>
+                </tr>
+                </tbody>
+            </table>
+            <br>
+            Both snpEff and VEP annotate the variants and predict coding effects. snpEff uses multiple databases while
+            VEP is based on Ensembl.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
         <img src="{% static 'images/tutorials/sarek/sarek_fasta.png' %}" alt="Sarek fasta file">
         <figcaption><small>
             The "FASTA genome file" allows you to upload a fasta file containing the nucleotide sequences of the species
