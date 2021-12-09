@@ -19,12 +19,3 @@ def about_view(request, *args, **kwargs):
 def contact_view(request, *args, **kwargs):
     return render(request, 'contact.html', {})
 
-
-# def test_view(request, *args, **kwargs):
-#     from django.conf import settings
-#     if request.method == "POST" and "base_dir" in request.POST:
-#         print("ping")
-#         base_dir = settings.BASE_DIR
-#         print(base_dir)
-#         return render(request, 'test.html', {"base_dir": base_dir})
-#     return render(request, 'test.html',)

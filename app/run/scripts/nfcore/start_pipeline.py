@@ -75,8 +75,8 @@ def rnaseq(
     command = ['nextflow', 'run',
                # '%s' % scirpt_location,
                'nf-core/rnaseq',
-               '-r', '3.3',
-               # '-r', '3.4',
+               # '-r', '3.3',
+               '-r', '3.4',
                '--input', '%s' % csv_file, '--max_memory', '8.GB', '--max_cpus', '8']
     if umi_value is True:
         command.extend(['--with_umi', 'True', '--umitools_extract_method', '%s' % umi_method, '--umitools_bc_pattern',
@@ -122,7 +122,7 @@ def rnaseq(
         m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin" \
                                         ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin"
 
-    print("PATH: ", m_env["PATH"])
+    # print("PATH: ", m_env["PATH"])
 
     t0 = time.time()
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
@@ -166,7 +166,12 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
 
     print("chipseq-command:", command)
 
-    run.pipeline_command = ' '.join(command)
+    model_command = ' '.join(command)
+    model_command = model_command.replace(
+        "/usr/src/app/nfscripts/nfcore/chipseq/main.nf",
+        "nf-core/chipseq")
+
+    run.pipeline_command = model_command
     run.save()
 
     start_msg = "Starting ChIP-Seq pipeline.."
@@ -215,7 +220,12 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
 
     print("sarek-command:", command)
 
-    run.pipeline_command = ' '.join(command)
+    model_command = ' '.join(command)
+    model_command = model_command.replace(
+        "/usr/src/app/nfscripts/nfcore/sarek/main.nf",
+        "nf-scripts/sarek")
+
+    run.pipeline_command = model_command
     run.save()
 
     # set start_msg, stop_msg and run pipeline

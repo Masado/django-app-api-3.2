@@ -1,5 +1,5 @@
 # pull official base image
-FROM ubuntu:latest
+FROM ubuntu:20.04
 
 # set work directory
 WORKDIR /usr/src/app
@@ -67,7 +67,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 ##############################
 ## install conda
-# add conda bin to PATH
+# add conda bin to PATHSaimin Sei
 ENV PATH="/root/miniconda3/bin:${PATH}"
 ARG PATH="/root/miniconda3/bin:${PATH}"
 
@@ -130,9 +130,9 @@ RUN curl -s https://get.nextflow.io | bash \
 ##############################
 ## install r-base
 # configure default locale
-RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
-	&& locale-gen en_US.utf8 \
-	&& /usr/sbin/update-locale LANG=en_US.UTF-8
+#RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
+#	&& locale-gen en_US.utf8 \
+#	&& /usr/sbin/update-locale LANG=en_US.UTF-8
 
 RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" > /etc/apt/sources.list.d/cran.list
 

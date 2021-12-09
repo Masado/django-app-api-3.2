@@ -138,6 +138,10 @@ app/mediafiles/run
 
 # database backups
 db/db-backup-*.sql
+pg_dump.txt
+
+# database directory
+db/
 
 # pycharm files
 .idea/

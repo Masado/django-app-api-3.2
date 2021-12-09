@@ -44,13 +44,13 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
     print("postrnaseq-command:", command)
 
     model_command = ' '.join(command)
-    print("model_command: ", model_command)
+    # print("model_command: ", model_command)
     model_command = model_command.replace(
         "/usr/src/app/nfscripts/post_rnaseq/post_rnaseq_pipeline_scripts_directory_extended_modified_testing_django_1.1.nf",
         "post_rnaseq.nf")
     model_command = model_command.replace("/usr/src/app/mediafiles/run/" + run_id + "/output/", "output/")
     model_command = model_command.replace("/usr/src/app/nfscripts/post_rnaseq/scripts/", "scripts/")
-    print("model_command: ", model_command)
+    # print("model_command: ", model_command)
     run.pipeline_command = model_command
     run.save()
 
@@ -99,7 +99,12 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
         command.extend(['--bam', 'bam/'])
     print(command)
 
-    run.pipeline_command = ' '.join(command)
+    model_command = ' '.join(command)
+    model_command = model_command.replace(
+        "/usr/src/app/nfscripts/post_atacchipseq/main_1.1.nf",
+        "post_atachchipseq.nf")
+
+    run.pipeline_command = model_command
     run.save()
 
     m_env = os.environ.copy()
@@ -111,7 +116,7 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
         m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:" \
                                         ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin"
 
-    print("PATH: ", m_env["PATH"])
+    # print("PATH: ", m_env["PATH"])
 
     t0 = time.time()
     result = run_pipe(command=command, start_msg="Starting Post-ATAC-Seq/ChIP-Seq pipeline...",
@@ -133,7 +138,12 @@ def crisprcas(db, db_type, script_location,
 
     print(command)
 
-    run.pipeline_command = ' '.join(command)
+    model_command = ' '.join(command)
+    model_command = model_command.replace(
+        "/usr/src/app/nfscripts/crispr_cas/main_1.1.nf",
+        "crisprcas.nf")
+
+    run.pipeline_command = model_command
     run.save()
     
     m_env = os.environ.copy()

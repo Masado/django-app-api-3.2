@@ -3,25 +3,25 @@
 ###########
 
 # pull official base image
-FROM python:3.9.6-alpine as builder
+# FROM python:3.9.6-alpine as builder
 
 # set work directory
-WORKDIR /usr/src/app
+# WORKDIR /usr/src/app
 
 # set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV DEBIAN_FRONTEND=noninteractive
+# ENV PYTHONDONTWRITEBYTECODE 1
+# ENV PYTHONUNBUFFERED 1
+# ENV DEBIAN_FRONTEND=noninteractive
 
 
 # install psycopg2 dependencies
-RUN apk update \
-    && apk add postgresql-dev gcc python3-dev musl-dev
+# RUN apk update \
+#     && apk add postgresql-dev gcc python3-dev musl-dev
 
 # lint
-RUN pip install --upgrade pip
-RUN pip install flake8==3.9.2
-COPY . .
+# RUN pip install --upgrade pip
+# RUN pip install flake8==3.9.2
+# COPY . .
 # RUN flake8 --ignore=E501,F401 .
 
 # install dependencies
@@ -34,7 +34,7 @@ COPY . .
 #########
 
 # pull official base image
-FROM ubuntu:latest
+FROM ubuntu:20.04
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -179,9 +179,9 @@ RUN curl -s https://get.nextflow.io | bash \
 ##############################
 ## install r-base
 # configure default locale
-RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
-	&& locale-gen en_US.utf8 \
-	&& /usr/sbin/update-locale LANG=en_US.UTF-8
+# RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
+# 	&& locale-gen en_US.utf8 \
+# 	&& /usr/sbin/update-locale LANG=en_US.UTF-8
 
 RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" > /etc/apt/sources.list.d/cran.list
 
@@ -197,7 +197,7 @@ RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		littler\
 		r-cran-littler \
-		r-base \
+        r-base \
         r-base-core \
 		r-base-dev \
 		r-recommended \
@@ -242,6 +242,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev
 COPY ./requirements.txt .
 RUN pip install --no-cache -r requirements.txt  # /wheels/*
 
+# setup NCBI database
+COPY ./ncbi_setup.py .
+RUN python ncbi_setup.py && \
+    rm ncbi_setup.py
+
 # copy entrypoint.prod.sh
 COPY ./entrypoint.prod.sh .
 RUN sed -i 's/\r$//g'  $APP_HOME/entrypoint.prod.sh
@@ -253,18 +258,12 @@ RUN chmod +x  $APP_HOME/entrypoint.prod.sh
 # copy project
 COPY . $APP_HOME
 
-# setup NCBI database
-RUN python ncbi_setup.py
-
 # chown all the files to the app user
 RUN chown -R app:app $APP_HOME
 RUN chown -R app.app $HOME/.nextflow/
 
 # change to the app user
 USER app
-
-# test nextflow
-RUN nextflow help
 
 # run entrypoint.prod.sh
 ENTRYPOINT ["/home/app/web/entrypoint.prod.sh"]
