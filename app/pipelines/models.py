@@ -10,6 +10,7 @@ class Pipeline(models.Model):
     short = models.CharField(max_length=50, default='postrna')
     pub_date = models.DateTimeField('date published', auto_now_add=True)
     sorting_id = models.CharField(max_length=20)
+    # target_destination = models.CharField(max_length=50, default="postrna")
 
     def __str__(self):
         return self.pipeline_name

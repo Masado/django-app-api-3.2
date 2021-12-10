@@ -200,10 +200,18 @@
             </tr>
             <tr class="bottom-borderless">
                 <td class="noBorder" colspan="2">
-                    <div id="id_vc_tools" class="inline-group">
-                        <label for="id_vc_snpeff" class="ml-4">snpEff</label><input id="id_vc_snpeff" class="checkbox-row" type="checkbox" name="snpEff">
-                        <label for="id_vc_vep" class="ml-4">VEP</label><input id="id_vc_vep" class="checkbox-row" type="checkbox" name="VEP">
-                    </div>
+                    <table>
+                        <tr>
+                            <td class="noBorder"><label for="id_vc_snpeff" class="ml-4">snpEff</label></td>
+                            <td class="noBorder"><input id="id_vc_snpeff" class="checkbox-row" type="checkbox" name="snpEff"></td>
+                            <td class="noBorder"><label for="id_vc_vep" class="ml-4">VEP</label></td>
+                            <td class="noBorder"><input id="id_vc_vep" class="checkbox-row" type="checkbox" name="VEP"></td>
+                        </tr>
+                    </table>
+{#                    <div id="id_vc_tools" class="inline-group">#}
+{#                        <label for="id_vc_snpeff" class="ml-4">snpEff</label><input id="id_vc_snpeff" class="checkbox-row" type="checkbox" name="snpEff">#}
+{#                        <label for="id_vc_vep" class="ml-4">VEP</label><input id="id_vc_vep" class="checkbox-row" type="checkbox" name="VEP">#}
+{#                    </div>#}
                 </td>
                 <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
                                             title="You can select both tools to run them consecutively.">
