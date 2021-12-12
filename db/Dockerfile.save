@@ -1,4 +1,0 @@
- nc: getaddrinfo for host "db" port 5432: Temporary failure in name resolution
-
-
-ADD ./db-groundwork.sql /docker-entrypoint-initdb.d
