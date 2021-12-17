@@ -1,10 +1,7 @@
 import subprocess as sp
-import logging
-import pandas as pd
 
 from collections import OrderedDict, defaultdict, Counter
 import logging
-import argparse
 import glob
 import os
 
@@ -12,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def run_pipe(command, shell_bo=False, start_msg="Starting nextflow pipeline...",
-             stop_msg="pipeline finished successfully!", silent=False, m_env=os.environ.copy()):
+             stop_msg="Pipeline finished successfully!", silent=False, m_env=os.environ.copy()):
     print(start_msg)
     print("PATH: ", m_env["PATH"])
     process = sp.run(command,

@@ -19,7 +19,7 @@ class Pipeline(models.Model):
 class Dataset(models.Model):
     base_pipeline_name = models.CharField(max_length=80)
     short_pipe = models.CharField(max_length=50)
-    description = models.CharField(max_length=2000)
+    description = models.TextField(max_length=2000)
     short = models.CharField(max_length=50)
     base_pipe_name_wo = models.CharField(max_length=50)
     pub_date = models.DateTimeField('date published', auto_now_add=True)
@@ -30,9 +30,9 @@ class Dataset(models.Model):
 
 class DatasetPipelines(models.Model):
     pipeline_name = models.CharField(max_length=80)
-    short_description = models.CharField(max_length=200)
+    short_description = models.TextField(max_length=2000)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
-    description = models.CharField(max_length=2000)
+    description = models.TextField(max_length=2000)
     target_destination = models.CharField(max_length=50)
 
     def __str__(self):

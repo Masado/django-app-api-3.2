@@ -39,6 +39,13 @@ def detail_view(request, *args, **kwargs):
     return render(request, template_name, context)
 
 
+# igenome reference list
+def igenome_view(request, *args, **kwargs):
+    template_name = 'run/igenome_list.html'
+
+    return render(request, template_name)
+
+
 # redirecting views
 def get_download_view(request, *args, **kwargs):
     # set template_name
@@ -52,7 +59,6 @@ def get_download_view(request, *args, **kwargs):
         # if the entered run_id has a corresponding run directory, redirect to the download page for the entered run_id
         if os.path.exists(path):
 
-            target_url = ''
             if os.path.exists(path + '/.crashed.txt'):  # check if pipeline has crashed
                 with open(path + '/.crashed.txt', 'r') as fl:
                     for line in fl:
@@ -94,7 +100,6 @@ def get_fail_view(request, *args, **kwargs):
 def run_id_taken_view(request, *args, **kwargs):
     # set template name
     template_name = 'run/id_taken.html'
-    template_name = 'run/id_taken.html'
 
     # set run_id
     run_id = kwargs['run_id']
@@ -104,12 +109,6 @@ def run_id_taken_view(request, *args, **kwargs):
 
     # render out page
     return render(request, template_name, context=context)
-
-
-def igenome_view(request, *args, **kwargs):
-    template_name = 'run/igenome_list.html'
-
-    return render(request, template_name)
 
 
 ###########################################################
@@ -147,15 +146,11 @@ def spreadsheet_view(request, *args, **kwargs):
             df = pd.DataFrame(np.zeros([rows, cols]))
             for r in range(rows):
                 print("r: ", r)
-                # column = []
                 for c in range(cols):
                     print("c: ", c)
                     value = request.POST['r' + str(r) + '_c' + str(c)]
                     print("value: ", value)
-                    # column.append(value)
                     df[c][r] = value
-                # print("column: ", column)
-                # df = df.append(column)
             print(df)
             df.to_csv(file_path, sep="\t", index=False, header=False, na_rep="")
         else:
@@ -230,6 +225,63 @@ def spreadsheet_view(request, *args, **kwargs):
 
 
 ###########################################################
+# reference loader
+
+def reference_loader_view(request, *args, **kwargs):
+    # set template_name
+    template_name = 'run/gtf_loader.html'
+
+    if request.method == 'POST':
+
+        file_id = generate_and_check_id()
+        id_path = get_id_path(file_id, dest="file")
+        create_directory(id_path)
+
+        os.chdir(id_path)
+
+        organism_name = request.POST["org_name"]
+
+        select = request.POST["selector"]
+
+        from .app_settings import ENSEMBL_RELEASE, ENSEMBL_RELEASE_NUMBER
+
+        # if 'get_gtf' in request.POST:
+        if select == "gtf":
+            # get gtf annotation
+            from .tasks import rsync_file, ungzip_file
+            expected_org_name = organism_name.strip().lower().replace(" ", "_")
+            print("gaf_name: ", expected_org_name)
+            source = "rsync://ftp.ensembl.org/ensembl/pub/current_gtf/" + expected_org_name
+            destination = "."
+            get_out = '.' + ENSEMBL_RELEASE_NUMBER + ".gtf.gz"
+            rsync_type = "file"
+            gtf_file_compressed = rsync_file(source=source, destination=destination, getout=get_out, run_id=file_id,
+                                             rsync_type=rsync_type)
+            file_path = id_path + str(gtf_file_compressed)
+            return download_file(request, file_path)
+
+        # elif 'get_fasta' in request.POST:
+        elif select == "fasta":
+            # get gtf annotation
+            from .tasks import rsync_file, ungzip_file
+            expected_org_name = organism_name.strip().lower().replace(" ", "_")
+            print("gaf_name: ", expected_org_name)
+            source = "rsync://ftp.ensembl.org/ensembl/pub/current_fasta/" + expected_org_name + "/dna_index/"
+            destination = "."
+            get_out = ".dna.toplevel.fa.gz"
+            rsync_type = "file"
+            fasta_file_compressed = rsync_file(source=source, destination=destination, getout=get_out, run_id=file_id,
+                                               rsync_type=rsync_type)
+            file_path = id_path + str(fasta_file_compressed)
+            print("file_path: ", file_path)
+
+            return download_file(request, file_path)
+
+    # render page
+    return render(request, template_name)
+
+
+###########################################################
 # universal_download view
 class UniversalDownloadView(View):
     template_name = 'run/universal_download.html'
@@ -300,8 +352,10 @@ class PostRNASeq(View):
 
             # check if directory already exists
             print("starting 'check_for_run_dir'")
-            taken = check_for_run_dir(run_id)
-            if taken is True:
+            # taken = check_for_run_dir(run_id)
+            # if taken is True:
+            #     return redirect('run:idTaken', run_id)
+            if check_for_run_dir(run_id):
                 return redirect('run:idTaken', run_id)
 
             # create working directory
@@ -338,14 +392,11 @@ class PostRNASeq(View):
 
             # get gtf annotation
             from .tasks import rsync_file, ungzip_file
-            gaf_name = organism_name.strip().lower().replace(" ", "_")
-            print("gaf_name: ", gaf_name)
-            source = "rsync://ftp.ensembl.org/ensembl/pub/current_gtf/" + gaf_name
+            expected_file_name = organism_name.strip().lower().replace(" ", "_")
+            print("gaf_name: ", expected_file_name)
+            source = "rsync://ftp.ensembl.org/ensembl/pub/current_gtf/" + expected_file_name
             destination = "."
             get_out = '.' + ENSEMBL_RELEASE_NUMBER + ".gtf.gz"
-            # print("source: ", source)
-            # print("destination: ", destination)
-            # print("getout: ", get_out)
             annotation_file_compressed = rsync_file(source=source, destination=destination, getout=get_out,
                                                     run_id=run_id)
             annotation_file = ungzip_file(annotation_file_compressed)
@@ -395,12 +446,15 @@ class PostRNASeq(View):
             # deleting progress file
             del_file([".inprogress.txt"])
 
-            # clean_wd()
+            clean_wd()
 
+            print("And thanks for all the fish!")
             # redirect to download- or fail-page, based on results
             if result != 0:
                 result = str(result)
-                print("And thanks for all the fish!")
+                from .tasks import create_crash_file
+                create_crash_file(id_path, result)
+
                 return redirect('/run/fail_' + run_id + '_' + result + '/')
             else:
                 # redirect to download page
@@ -453,8 +507,10 @@ class PostAC(View):
 
         # check if directory already exists
         print("starting 'check_for_run_dir'")
-        taken = check_for_run_dir(run_id)
-        if taken is True:
+        # taken = check_for_run_dir(run_id)
+        # if taken is True:
+        #     return redirect('run:idTaken', run_id)
+        if check_for_run_dir(run_id):
             return redirect('run:idTaken', run_id)
 
         create_directory(id_path)
@@ -557,12 +613,13 @@ class PostAC(View):
         # t_end = time.time()
         # print("time elapsed: ", t_end - t_start)
 
-        if result == 0:
-            return redirect('/run/download_' + run_id + '/')
-        else:
+        if result != 0:
             result = str(result)
-            context = {'result': result}
+            from .tasks import create_crash_file
+            create_crash_file(id_path, result)
             return redirect('/run/fail_' + run_id + '_' + result + '/')
+        else:
+            return redirect('/run/download_' + run_id + '/')
 
 
 # Post-ATAC/ChIP-Seq Tutorial View
@@ -609,8 +666,10 @@ class AtacSeqRun(View):
 
         # check if directory already exists
         print("starting 'check_for_run_dir'")
-        taken = check_for_run_dir(run_id)
-        if taken is True:
+        # taken = check_for_run_dir(run_id)
+        # if taken is True:
+        #     return redirect('run:idTaken', run_id)
+        if check_for_run_dir(run_id):
             return redirect('run:idTaken', run_id)
 
         # create working directory
@@ -807,13 +866,14 @@ class AtacSeqRun(View):
                 clean_wd()
 
                 # redirect to download or fail page, based on pipeline results
-                if result == 0:
-                    # redirect to download page
-                    # return redirect('/run/nfcore/download_' + run_id + '/')
-                    return redirect('/run/download_' + run_id + '/')
-                else:
+                if result != 0:
                     result = str(result)
+                    from .tasks import create_crash_file
+                    create_crash_file(id_path, result)
                     return redirect('/run/fail_' + run_id + '_' + result + '/')
+                else:
+                    # redirect to download page
+                    return redirect('/run/download_' + run_id + '/')
 
         elif "run_atacseq_advanced" in request.POST:
 
@@ -1130,6 +1190,8 @@ class AtacSeqRun(View):
             # redirect to download or fail page, based on pipeline results
             if result != 0:
                 result = str(result)
+                from .tasks import create_crash_file
+                create_crash_file(id_path, result)
                 return redirect('/run/fail_' + run_id + '_' + result + '/')
             else:
                 # redirect to download page
@@ -1162,8 +1224,10 @@ class ChipSeqRun(View):
 
         # check if directory already exists
         print("starting 'check_for_run_dir'")
-        taken = check_for_run_dir(run_id)
-        if taken is True:
+        # taken = check_for_run_dir(run_id)
+        # if taken is True:
+        #     return redirect('run:idTaken', run_id)
+        if check_for_run_dir(run_id):
             return redirect('run:idTaken', run_id)
 
         # create working directory
@@ -1361,13 +1425,15 @@ class ChipSeqRun(View):
             clean_wd()
 
             # redirect to download or fail page, based on pipeline results
-            if result == 0:
+            if result != 0:
+                result = str(result)
+                from .tasks import create_crash_file
+                create_crash_file(id_path, result)
+                return redirect('/run/fail_' + run_id + '_' + result + '/')
+            else:
                 # redirect to download page
                 # return redirect('/run/nfcore/download_' + run_id + '/')
                 return redirect('/run/download_' + run_id + '/')
-            else:
-                result = str(result)
-                return redirect('/run/fail_' + run_id + '_' + result + '/')
 
 
 # class function for the nf-core RNA-Seq pipeline
@@ -1394,8 +1460,10 @@ class RnaSeqRun(View):
 
         # check if directory already exists
         print("starting 'check_for_run_dir'")
-        taken = check_for_run_dir(run_id)
-        if taken is True:
+        # taken = check_for_run_dir(run_id)
+        # if taken is True:
+        #     return redirect('run:idTaken', run_id)
+        if check_for_run_dir(run_id):
             return redirect('run:idTaken', run_id)
 
         # create working directory
@@ -1405,7 +1473,7 @@ class RnaSeqRun(View):
         create_progress_file(id_path)
 
         # get organism_name
-        organism_name = request.POST['organism_name']
+        organism_name = request.POST.get('organism_name')
 
         # get csv_file and handle file
         csv_file = request.FILES['csv_file']
@@ -1554,7 +1622,7 @@ class RnaSeqRun(View):
                         run=run)
 
         # compress results
-        from .tasks import zip_file, tar_file, del_file
+        from .tasks import zip_file, tar_file
         tar_file("results.tar.gz", "results/")
         zip_file("results.zip", "results/")
 
@@ -1562,6 +1630,8 @@ class RnaSeqRun(View):
             if result == 0:
                 # prepare work directory
                 from .tasks import del_file, cp_file
+
+                p_run_id = run_id + "_p"
 
                 # get files
                 organism_name = request.POST['organism_name']
@@ -1631,11 +1701,12 @@ class RnaSeqRun(View):
                 file_list = ["results", "work"]
                 del_file(file_list)
 
-                run = Run(run_id=run_id + "_p", pipeline="Post-RNA-Seq")
+                run = Run(run_id=p_run_id, pipeline="Post-RNA-Seq")
+                run.save()
 
                 # import and run post_rnaseq
                 from .scripts.postrnaseq.start_pipeline import postrnaseq
-                result = postrnaseq(samples=sample_file, salmon=salmon_file, compare=compare_tsv_file,
+                result = postrnaseq(run_id=run_id, samples=sample_file, salmon=salmon_file, compare=compare_tsv_file,
                                     annotation_file=annotation_file, network=network_file, species_id=species_id,
                                     organism=organism_name, pathways=pathways_number, kmin=kmin, kmax=kmax,
                                     kstep=kstep, lmin=lmin, lmax=lmax, lstep=lstep, out=out_path,
@@ -1664,16 +1735,18 @@ class RnaSeqRun(View):
             # deleting progress file
             del_file([".inprogress.txt"])
 
-            # clean_wd()
+            clean_wd()
 
             # redirect to download or fail page, based on pipeline results
-            if result == 0:
-                print("And thanks for all the fish!")
+            print("And thanks for all the fish!")
+            if result != 0:
+                result = str(result)
+                from .tasks import create_crash_file
+                create_crash_file(id_path, result)
+                return redirect('/run/fail_' + run_id + '_' + result + '/')
+            else:
                 # redirect to download page
                 return redirect('/run/download_' + run_id + '/')
-            else:
-                result = str(result)
-                return redirect('/run/fail_' + run_id + '_' + result + '/')
 
 
 # class function for the nf-core Sarek pipeline
@@ -1699,8 +1772,10 @@ class SarekRun(View):
 
         # check if directory already exists
         print("starting 'check_for_run_dir'")
-        taken = check_for_run_dir(run_id)
-        if taken is True:
+        # taken = check_for_run_dir(run_id)
+        # if taken is True:
+        #     return redirect('run:idTaken', run_id)
+        if check_for_run_dir(run_id):
             return redirect('run:idTaken', run_id)
 
         # create working directory
@@ -1898,6 +1973,14 @@ class CrisprCasView(View):
         # run_id = kwargs['run_id']
         run_id = request.POST['run_id']
         id_path = get_id_path(run_id)  # id_path is nextflow's working directory in the media/run directory
+
+        # check if directory already exists
+        print("starting 'check_for_run_dir'")
+        # taken = check_for_run_dir(run_id)
+        # if taken is True:
+        #     return redirect('run:idTaken', run_id)
+        if check_for_run_dir(run_id):
+            return redirect('run:idTaken', run_id)
 
         # create working directory
         create_directory(id_path)

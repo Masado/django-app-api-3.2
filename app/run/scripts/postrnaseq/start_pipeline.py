@@ -31,9 +31,10 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
                '--kmin', '%s' % kmin, '--kmax', '%s' % kmax, '--kstep', '%s' % kstep,
                '--lmin', '%s' % lmin, '--lmax', '%s' % lmax, '--lstep', '%s' % lstep, '--out', '%s' % out]
     if os.path.isfile('%s/tx2gene.csv' % salmon):
-        print("ping")
         command.extend(['--tx2', '%s' % salmon + 'tx2gene.csv'])
-
+    elif os.path.isfile('%s/salmon_tx2gene.csv' % salmon):
+        os.replace('%s/salmon_tx2gene.csv' % salmon, '%s/tx2gene.csv' % salmon)
+        command.extend(['--tx2', '%s' % salmon + 'tx2gene.csv'])
     else:
         from ..tasks import tx2gene
         print("Generating tx2gene.csv")

@@ -73,11 +73,10 @@ def rnaseq(
     scirpt_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/rnaseq/main.nf"
 
     command = ['nextflow', 'run',
-               # '%s' % scirpt_location,
                'nf-core/rnaseq',
-               # '-r', '3.3',
                '-r', '3.4',
-               '--input', '%s' % csv_file, '--max_memory', '8.GB', '--max_cpus', '8']
+               '--input', '%s' % csv_file,
+               '--max_memory', '8.GB', '--max_cpus', '8']
     if umi_value is True:
         command.extend(['--with_umi', 'True', '--umitools_extract_method', '%s' % umi_method, '--umitools_bc_pattern',
                         '%s' % umi_pattern])
@@ -145,7 +144,8 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
         '%s' % script_location,
         # '-profile', 'docker',
         # '-profile', 'conda',
-        '--input', '%s' % design_file
+        '--input', '%s' % design_file,
+        '--max_memory', '8.GB', '--max_cpus', '8'
     ]
     if single_end is True:
         command.extend(['--single_end', 'True'])
@@ -161,8 +161,6 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
         command.extend(['--macs_gsize', '%s' % macs_size])
     if narrow_peaks:
         command.extend(['--narrow_peak', 'True'])
-
-    command.extend(['--max_memory', '8.GB', '--max_cpus', '8'])
 
     print("chipseq-command:", command)
 

@@ -118,14 +118,14 @@ RUN conda env create -f environment.yml && \
 ###################################################
 ## nf-core bins
 
-COPY ./nfscripts/nfcore/atacseq/bin /nfscripts/nfcore/atacseq/bin
-ENV PATH $PATH:/nfscripts/nfcore/atacseq/bin
-COPY ./nfscripts/nfcore/sarek/bin /nfscripts/nfcore/sarek/bin
-ENV PATH $PATH:/nfscripts/nfcore/sarek/bin
+#COPY ./nfscripts/nfcore/atacseq/bin /nfscripts/nfcore/atacseq/bin
+#ENV PATH $PATH:/nfscripts/nfcore/atacseq/bin
+#COPY ./nfscripts/nfcore/sarek/bin /nfscripts/nfcore/sarek/bin
+#ENV PATH $PATH:/nfscripts/nfcore/sarek/bin
 ###################################################
 ## install nextflow
-RUN curl -s https://get.nextflow.io | bash \
-    && mv nextflow /usr/local/bin \
+RUN curl -s https://get.nextflow.io | bash
+RUN mv nextflow /usr/local/bin \
     && nextflow info
 ##############################
 ## install r-base

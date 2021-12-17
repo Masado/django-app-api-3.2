@@ -6,7 +6,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect
 from django.core.files.storage import FileSystemStorage, Storage
 from pathlib import Path
-from datetime import datetime, time, date, timedelta
+from datetime import datetime, time, date
 import os
 import subprocess as sp
 import tarfile
@@ -32,8 +32,9 @@ def random_string_id(x):
 
 
 def generate_and_check_id():
+    from .models import Run
     run_id = random_string_id(16)
-    if os.path.isdir(str(settings.MEDIA_ROOT) + '/run/' + run_id):
+    if os.path.isdir(str(settings.MEDIA_ROOT) + '/run/' + run_id) or Run.objects.filter(run_id=run_id).exists():
         generate_and_check_id()
     else:
         return run_id
@@ -47,9 +48,8 @@ def generate_and_check_sheet_id():
         return sheet_id
 
 
-def get_id_path(run_id):
-    # id_path = str(settings.BASE_DIR) + "/media/run/" + run_id + "/"
-    id_path = str(settings.MEDIA_ROOT) + "/run/" + run_id + "/"
+def get_id_path(run_id, dest="run"):
+    id_path = str(settings.MEDIA_ROOT) + "/" + dest + "/" + run_id + "/"
     print("id_path: ", id_path)
     return id_path
 
@@ -224,19 +224,6 @@ def find_pipeline(pipeline_name, run_id):
         return redirect('run:SarekRun')
 
 
-def start_docker():
-    command = ['systemctl', 'start', 'docker']
-    process = sp.run(command,
-                     stderr=sp.PIPE,
-                     stdout=sp.PIPE,
-                     shell=False,
-                     universal_newlines=True)
-    if process.returncode == 0:
-        print("Pipeline finished successfully!")
-    else:
-        print("Pipeline finished with error code:{0}".format(str(process.returncode)))
-
-
 def cp_file(file_path, target):
     command = ['cp -r %s' % file_path, '%s' % target]
     print("copycommand: ", command)
@@ -322,7 +309,7 @@ def del_file(filelist):
 
 def rsync_file(
         # target, include, getout
-        source, destination, getout, run_id
+        source, destination, getout, run_id, rsync_type="run"
 ):
     command = ['rsync', '-avi', source, destination]
 
@@ -349,11 +336,15 @@ def rsync_file(
                         if items[1].strip().endswith(getout):
                             print("item: ", items[1])
                             from distutils.file_util import copy_file
-                            target_dir = str(settings.MEDIA_ROOT) + "/run/" + run_id + "/" + items[1].strip()
+                            target_dir = str(settings.MEDIA_ROOT) + "/" + rsync_type + "/" + run_id + "/" + items[1].strip()
                             print(target_dir)
                             print("isfile: ", os.path.isfile(target_dir))
-                            file_name = items[1].strip().split("/")[1]
-                            copy_file(target_dir, str(settings.MEDIA_ROOT) + "/run/" + run_id + "/" + file_name)
+                            if getout.endswith(".gtf.gz"):
+                                file_name = items[1].strip().split("/")[1]
+                                copy_file(target_dir,
+                                          str(settings.MEDIA_ROOT) + "/" + rsync_type + "/" + run_id + "/" + file_name)
+                            else:
+                                file_name = items[1].strip()
                             return file_name.strip()
 
             finished = True
@@ -397,13 +388,15 @@ def get_taxid(name):
 
 
 def check_for_run_dir(run_id):
-    # id_path = settings.MEDIA_ROOT + '/run/' + run_id + '/'
+    from .models import Run
     id_path = get_id_path(run_id)
     print("checking for id_path")
     print(os.path.isdir(id_path))
-    if os.path.isdir(id_path):
+    if os.path.isdir(id_path) or Run.objects.filter(run_id=run_id).exists():
         print("ping")
         return True
+    else:
+        return False
         # return redirect('run:idTaken', run_id)
         # return redirect('run:idTaken', run_id)
 
@@ -457,6 +450,12 @@ def download_file(request, file_path):
                 response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(
                     file_path)
                 return response
+        elif file_extension == ".gz":
+            with open(file_path, 'rb') as fh:
+                response = HttpResponse(fh.read(), content_type="application/gzip")
+                response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(
+                    file_path)
+                return response
     raise Http404
 
 
@@ -499,7 +498,8 @@ def download_tutorial(request, pipe, file):
                 return response
         else:
             return HttpResponse(
-                "It appears this pipeline does not yet have a functioning tutorial-archive.\n" + "We apologize for the inconvenience")
+                "It appears this pipeline does not yet have a functioning tutorial-archive.\n" +
+                "We apologize for the inconvenience")
         raise Http404
     elif file[-4:] == ".zip":
         if os.path.exists(file_path):
@@ -509,5 +509,6 @@ def download_tutorial(request, pipe, file):
                 return response
         else:
             return HttpResponse(
-                "It appears this pipeline does not yet have a functioning tutorial-archive.\n" + "We apologize for the inconvenience")
+                "It appears this pipeline does not yet have a functioning tutorial-archive.\n" +
+                "We apologize for the inconvenience")
         raise Http404
