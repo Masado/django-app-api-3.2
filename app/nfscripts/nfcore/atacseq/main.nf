@@ -444,11 +444,6 @@ if (MAKE_BED) {
     }
 }
 
-ch_gene_bed.into {
-	ch_gene_bed_1
-	ch_gene_bed_2
-	ch_gene_bed_3
-}
 
 /*
  * PREPROCESSING: Generate TSS BED file
@@ -459,7 +454,7 @@ if (!params.tss_bed) {
         publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
 
         input:
-        path bed from ch_gene_bed_1
+        path bed from ch_gene_bed
 
         output:
         path '*.bed' into ch_tss_bed
@@ -503,18 +498,21 @@ process MAKE_GENOME_FILTER {
 }
 
 
-
-
+/*
+ * POST-Preprocessing: export bed- and gtf-file
+ */
+ 
 process COPY_OUT_BED {
     publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
         
     input:
-    path gene_bed from ch_gene_bed_3
+    path gene_bed from ch_gene_bed
     path gtf from ch_gtf
         
     output:
+    path gene_bed into ch_gene_bed_void
+    path gtf into ch_gtf_co
     path 'gene_bed_name.txt'
-    path gtf into ch_gtf
     path 'gtf_name.txt'
         
     script:
@@ -522,11 +520,8 @@ process COPY_OUT_BED {
     echo ${gene_bed} > gene_bed_name.txt
     echo ${gtf} > gtf_name.txt
     """
-    
+
 }
-
-
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1063,7 +1058,7 @@ process MERGED_LIB_PLOTPROFILE {
 
     input:
     tuple val(name), path(bigwig) from ch_mlib_bigwig_plotprofile
-    path bed from ch_gene_bed_2
+    path bed from ch_gene_bed
 
     output:
     path '*.plotProfile.tab' into ch_mlib_plotprofile_mqc

@@ -67,7 +67,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 ##############################
 ## install conda
-# add conda bin to PATHSaimin Sei
+# add conda bin to PATH
 ENV PATH="/root/miniconda3/bin:${PATH}"
 ARG PATH="/root/miniconda3/bin:${PATH}"
 
@@ -112,9 +112,10 @@ COPY nfscripts/crispr_cas/environment.yml environment.yml
 RUN conda env create -f environment.yml && \
     rm environment.yml
 
-#ENV PATH=$PATH:/root/miniconda3/envs/crispr-cas-1.0/bin
-#RUN echo $PATH
-#RUN blastn -help
+COPY nfscripts/post_rnaseq/environment.yml environment.yml
+RUN conda env create -f environment.yml && \
+    rm environment.yml
+
 ###################################################
 ## nf-core bins
 

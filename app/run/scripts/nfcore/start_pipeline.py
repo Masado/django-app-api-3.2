@@ -13,12 +13,13 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
             macs_size, narrow_peaks,
             run: Run
             ):
+
     print("Starting nextflow pipeline...")
     command = ['nextflow', 'run',
-               # '%s' % script_location,
-               'nf-core/atacseq',
+               '%s' % script_location,
+               # 'nf-core/atacseq',
                # '-profile', 'conda',
-               '--input', '%s' % design_file, '--max_memory', '8.GB', '--max_cpus', '8'
+               '--input', '%s' % design_file, '--max_memory', '4.GB', '--max_cpus', '4'
                #  , '--outdir', '%s' % outdir,
                ]
     if single_end == 'true':
@@ -65,7 +66,6 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
 
 def rnaseq(
         csv_file, umi_value, umi_method, umi_pattern, igenome_reference, fasta_file, gtf_file,
-        # gff_file,
         bed_file, transcript_fasta, star_index_name, hisat2_index_name, rsem_index_name, salmon_index_name, aligner,
         pseudo_salmon_value,
         run: Run
@@ -76,7 +76,7 @@ def rnaseq(
                'nf-core/rnaseq',
                '-r', '3.4',
                '--input', '%s' % csv_file,
-               '--max_memory', '8.GB', '--max_cpus', '8']
+               '--max_memory', '4.GB', '--max_cpus', '4']
     if umi_value is True:
         command.extend(['--with_umi', 'True', '--umitools_extract_method', '%s' % umi_method, '--umitools_bc_pattern',
                         '%s' % umi_pattern])
@@ -145,7 +145,7 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
         # '-profile', 'docker',
         # '-profile', 'conda',
         '--input', '%s' % design_file,
-        '--max_memory', '8.GB', '--max_cpus', '8'
+        '--max_memory', '4.GB', '--max_cpus', '4'
     ]
     if single_end is True:
         command.extend(['--single_end', 'True'])
@@ -199,9 +199,9 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
           ):
     script_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/sarek/main.nf"
     command = ['nextflow', 'run',
-               '%s' % script_location,
-               # 'nf-core/sarek',
-               '--input', '%s' % tsv_file, '--max_memory', '8.GB', '--max_cpus', '8'
+               # '%s' % script_location,
+               'nf-core/sarek',
+               '--input', '%s' % tsv_file, '--max_memory', '4.GB', '--max_cpus', '4'
                # , '--skip_qc', 'bamqc,BaseRecalibrator'
                ]
     if igenome_reference is not None:

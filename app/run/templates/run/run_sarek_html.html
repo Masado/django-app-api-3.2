@@ -93,6 +93,7 @@
         {#        </p>#}
 
         <table>
+            <tbody>
             <tr>
                 <td class="noBorder"><label for="id_tsv_file" class="float-right">Input tsv-file:</label></td>
                 <td class="noBorder"><input id="id_tsv_file" type="file" class="ml-4" name="tsv_file" accept=".tsv"
@@ -129,104 +130,24 @@
                         href="http://0.0.0.0:8000/run/igenome/" target="_blank">here</a>.
                 </em></small></td>
             </tr>
-{#            <tr class="bottom-borderless">#}
-{#                <td class="noBorder"><label for="id_vc_tools">Variant calling tools:</label></td>#}
-{#                <td class="noBorder"><select id="id_vc_tools" name="vc_tools" multiple>#}
-{#                    <option value="FreeBayes">FreeBayes</option>#}
-{#                    <option value="HaplotypeCaller">HaplotypeCaller</option>#}
-{#                    <option value="Manta">Manta</option>#}
-{#                    <option value="mpileup">mpileup</option>#}
-{#                    <option value="Strelka">Strelka</option>#}
-{#                    <option value="TIDDIT">TIDDIT</option>#}
-{#                    <option value="ASCAT">ASCAT</option>#}
-{#                    <option value="Control-FREEC">Control-FREEC</option>#}
-{#                    <option value="MSIsensor">MSIsensor</option>#}
-{#                    <option value="Mutect2">Mutect2</option>#}
-{#                </select></td>#}
-{#                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"#}
-{#                                            title="You can select multiple tools for variant calling.">#}
-{#                </td>#}
-{#            </tr>#}
-            <tr>
-               <td colspan="3" class="noBorder" style="padding-top: 1em">Please select all variant calling tools you would like to use:</td>
-            </tr>
             <tr class="bottom-borderless">
-                <td class="noBorder" colspan="2">
-                    <div id="id_vc_tools" class="inline-group">
-                        <table>
-                            <tr>
-                                <td class="noBorder"><label for="id_vc_freebayes" class="ml-4">FreeBayes</label></td>
-                                <td class="noBorder"><input id="id_vc_freebayes" class="checkbox-row" type="checkbox" name="FreeBayes"></td>
-                                <td class="noBorder"><label for="id_vc_haplotypecaller" class="ml-4">HaplotypeCaller</label></td>
-                                <td class="noBorder"><input id="id_vc_haplotypecaller" class="checkbox-row" type="checkbox" name="HaplotypeCaller"></td>
-                                <td class="noBorder"><label for="id_vc_manta" class="ml-4">Manta</label></td>
-                                <td class="noBorder"><input id="id_vc_manta" class="checkbox-row" type="checkbox" name="Manta"></td>
-                                <td class="noBorder"><label for="id_vc_mpileup" class="ml-4">mpileup</label></td>
-                                <td class="noBorder"><input id="id_vc_mpileup" class="checkbox-row" type="checkbox" name="mpileup"></td>
-                                <td class="noBorder"><label for="id_vc_strelka" class="ml-4">Strelka</label></td>
-                                <td class="noBorder"><input id="id_vc_strelka" class="checkbox-row" type="checkbox" name="Strelka"></td>
-                            </tr>
-                            <tr>
-                                <td class="noBorder"><label for="id_vc_tiddit" class="ml-4">TIDDIT</label></td>
-                                <td class="noBorder"><input id="id_vc_tiddit" class="checkbox-row" type="checkbox" name="TIDDIT"></td>
-                                <td class="noBorder"><label for="id_vc_ascat" class="ml-4">ASCAT</label></td>
-                                <td class="noBorder"><input id="id_vc_ascat" class="checkbox-row" type="checkbox" name="ASCAT"></td>
-                                <td class="noBorder"><label for="id_vc_control-freec" class="ml-4">Control-FREEC</label></td>
-                                <td class="noBorder"><input id="id_vc_control-freec" class="checkbox-row" type="checkbox" name="Control-FREEC"></td>
-                                <td class="noBorder"><label for="id_vc_msisensor" class="ml-4">MSIsensor</label></td>
-                                <td class="noBorder"><input id="id_vc_msisensor" class="checkbox-row" type="checkbox" name="MSIsensor"></td>
-                                <td class="noBorder"><label for="id_vc_mutect2" class="ml-4">MUTECT2</label></td>
-                                <td class="noBorder"><input id="id_vc_mutect2" class="checkbox-row" type="checkbox" name="Mutect2"></td>
-                            </tr>
-                        </table>
-{#                        <label for="id_vc_freebayes" class="ml-4">FreeBayes</label><input id="id_vc_freebayes" class="checkbox-row" type="checkbox" name="FreeBayes">#}
-{#                        <label for="id_vc_haplotypecaller" class="ml-4">HaplotypeCaller</label><input id="id_vc_haplotypecaller" class="checkbox-row" type="checkbox" name="HaplotypeCaller">#}
-{#                        <label for="id_vc_manta" class="ml-4">Manta</label><input id="id_vc_manta" class="checkbox-row" type="checkbox" name="Manta">#}
-{#                        <label for="id_vc_mpileup" class="ml-4">mpileup</label><input id="id_vc_mpileup" class="checkbox-row" type="checkbox" name="mpileup">#}
-{#                        <label for="id_vc_strelka" class="ml-4">Strelka</label><input id="id_vc_strelka" class="checkbox-row" type="checkbox" name="Strelka"><br>#}
-{#                        <label for="id_vc_tiddit" class="ml-4">TIDDIT</label><input id="id_vc_tiddit" class="checkbox-row" type="checkbox" name="TIDDIT">#}
-{#                        <label for="id_vc_ascat" class="ml-4">ASCAT</label><input id="id_vc_ascat" class="checkbox-row" type="checkbox" name="ASCAT">#}
-{#                        <label for="id_vc_control-freec" class="ml-4">Control-FREEC</label><input id="id_vc_control-freec" class="checkbox-row" type="checkbox" name="Control-FREEC">#}
-{#                        <label for="id_vc_msisensor" class="ml-4">MSIsensor</label><input id="id_vc_msisensor" class="checkbox-row" type="checkbox" name="MSIsensor">#}
-{#                        <label for="id_vc_mutect2" class="ml-4">MUTECT2</label><input id="id_vc_mutect2" class="checkbox-row" type="checkbox" name="Mutect2">#}
-                    </div>
-                </td>
-                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
-                                            title="You can select multiple tools for the pipeline to run.">
+                <td colspan="3" class="noBorder">
+                    <label for="id_own_genome">Specify and upload your own references here: </label>
+                    <input type="checkbox" id="id_own_genome" name="own_genome" onclick="extend_genome_options()">
                 </td>
             </tr>
+            </tbody>
+            <tbody id="id_reference_genome_options" style="display: none">
             <tr>
-               <td colspan="3" class="noBorder">Please select all annotation tools you would like to use:</td>
-            </tr>
-            <tr class="bottom-borderless">
-                <td class="noBorder" colspan="2">
-                    <table>
-                        <tr>
-                            <td class="noBorder"><label for="id_vc_snpeff" class="ml-4">snpEff</label></td>
-                            <td class="noBorder"><input id="id_vc_snpeff" class="checkbox-row" type="checkbox" name="snpEff"></td>
-                            <td class="noBorder"><label for="id_vc_vep" class="ml-4">VEP</label></td>
-                            <td class="noBorder"><input id="id_vc_vep" class="checkbox-row" type="checkbox" name="VEP"></td>
-                        </tr>
-                    </table>
-{#                    <div id="id_vc_tools" class="inline-group">#}
-{#                        <label for="id_vc_snpeff" class="ml-4">snpEff</label><input id="id_vc_snpeff" class="checkbox-row" type="checkbox" name="snpEff">#}
-{#                        <label for="id_vc_vep" class="ml-4">VEP</label><input id="id_vc_vep" class="checkbox-row" type="checkbox" name="VEP">#}
-{#                    </div>#}
-                </td>
-                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
-                                            title="You can select both tools to run them consecutively.">
+                <td class="noBorder" colspan="3">
+                    <em><small>
+                        If you need help obtaining one or more of the required reference files you can try using our
+                        <br>
+                        <a href="http://0.0.0.0:8000/run/references/" target="_blank">reference loader</a> to obtain
+                        the latest Ensembl data for the species you used.
+                    </small></em>
                 </td>
             </tr>
-{#            <tr class="bottom-borderless">#}
-{#                <td class="noBorder"><label for="id_anno_tools">Annotation tools:</label></td>#}
-{#                <td class="noBorder"><select id="id_anno_tools" name="anno_tools[]" multiple style="height: 3.5em">#}
-{#                    <option value="snpEff">snpEff</option>#}
-{#                    <option value="VEP">VEP</option>#}
-{#                </select></td>#}
-{#                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"#}
-{#                                            title="You can select both tools to run them consecutively.">#}
-{#                </td>#}
-{#            </tr>#}
             <tr>
                 <td class="noBorder"><label for="id_fasta_file" class="float-right">Fasta genome reference:</label></td>
                 <td class="noBorder"><input id="id_fasta_file" type="file" class="ml-4" accept=".fa,.fasta"
@@ -235,6 +156,8 @@
                                             title="If you do not have a genome reference available you can upload a FASTA file and the pipeline will build a genome reference for you">
                 </td>
             </tr>
+            </tbody>
+            <tbody>
             <tr>
                 <td class="noBorder"><label for="id_dbsnp_file" class="float-right">Dbsnp file:</label></td>
                 <td class="noBorder"><input id="id_dbsnp_file" type="file" class="ml-4" accept=".vcf.gz"
@@ -251,6 +174,121 @@
                                             title="If you uploaded a dbsnp file, please also upload the corresponding index file. The file should have the same name as the dbsnp, but end in .vcf.gz.tbi and should be in the same location as the dbsnp file on NCBI.">
                 </td>
             </tr>
+            {#            <tr class="bottom-borderless">#}
+            {#                <td class="noBorder"><label for="id_vc_tools">Variant calling tools:</label></td>#}
+            {#                <td class="noBorder"><select id="id_vc_tools" name="vc_tools" multiple>#}
+            {#                    <option value="FreeBayes">FreeBayes</option>#}
+            {#                    <option value="HaplotypeCaller">HaplotypeCaller</option>#}
+            {#                    <option value="Manta">Manta</option>#}
+            {#                    <option value="mpileup">mpileup</option>#}
+            {#                    <option value="Strelka">Strelka</option>#}
+            {#                    <option value="TIDDIT">TIDDIT</option>#}
+            {#                    <option value="ASCAT">ASCAT</option>#}
+            {#                    <option value="Control-FREEC">Control-FREEC</option>#}
+            {#                    <option value="MSIsensor">MSIsensor</option>#}
+            {#                    <option value="Mutect2">Mutect2</option>#}
+            {#                </select></td>#}
+            {#                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"#}
+            {#                                            title="You can select multiple tools for variant calling.">#}
+            {#                </td>#}
+            {#            </tr>#}
+            <tr>
+                <td colspan="3" class="noBorder" style="padding-top: 1em">Please select all variant calling tools you
+                    would like to use:
+                </td>
+            </tr>
+            <tr class="bottom-borderless">
+                <td class="noBorder" colspan="2">
+                    <div id="id_vc_tools" class="inline-group">
+                        <table>
+                            <tr>
+                                <td class="noBorder"><label for="id_vc_freebayes" class="ml-4">FreeBayes</label></td>
+                                <td class="noBorder"><input id="id_vc_freebayes" class="checkbox-row" type="checkbox"
+                                                            name="FreeBayes"></td>
+                                <td class="noBorder"><label for="id_vc_haplotypecaller"
+                                                            class="ml-4">HaplotypeCaller</label></td>
+                                <td class="noBorder"><input id="id_vc_haplotypecaller" class="checkbox-row"
+                                                            type="checkbox" name="HaplotypeCaller"></td>
+                                <td class="noBorder"><label for="id_vc_manta" class="ml-4">Manta</label></td>
+                                <td class="noBorder"><input id="id_vc_manta" class="checkbox-row" type="checkbox"
+                                                            name="Manta"></td>
+                                <td class="noBorder"><label for="id_vc_mpileup" class="ml-4">mpileup</label></td>
+                                <td class="noBorder"><input id="id_vc_mpileup" class="checkbox-row" type="checkbox"
+                                                            name="mpileup"></td>
+                                <td class="noBorder"><label for="id_vc_strelka" class="ml-4">Strelka</label></td>
+                                <td class="noBorder"><input id="id_vc_strelka" class="checkbox-row" type="checkbox"
+                                                            name="Strelka"></td>
+                            </tr>
+                            <tr>
+                                <td class="noBorder"><label for="id_vc_tiddit" class="ml-4">TIDDIT</label></td>
+                                <td class="noBorder"><input id="id_vc_tiddit" class="checkbox-row" type="checkbox"
+                                                            name="TIDDIT"></td>
+                                <td class="noBorder"><label for="id_vc_ascat" class="ml-4">ASCAT</label></td>
+                                <td class="noBorder"><input id="id_vc_ascat" class="checkbox-row" type="checkbox"
+                                                            name="ASCAT"></td>
+                                <td class="noBorder"><label for="id_vc_control-freec" class="ml-4">Control-FREEC</label>
+                                </td>
+                                <td class="noBorder"><input id="id_vc_control-freec" class="checkbox-row"
+                                                            type="checkbox" name="Control-FREEC"></td>
+                                <td class="noBorder"><label for="id_vc_msisensor" class="ml-4">MSIsensor</label></td>
+                                <td class="noBorder"><input id="id_vc_msisensor" class="checkbox-row" type="checkbox"
+                                                            name="MSIsensor"></td>
+                                <td class="noBorder"><label for="id_vc_mutect2" class="ml-4">MUTECT2</label></td>
+                                <td class="noBorder"><input id="id_vc_mutect2" class="checkbox-row" type="checkbox"
+                                                            name="Mutect2"></td>
+                            </tr>
+                        </table>
+                        {#                        <label for="id_vc_freebayes" class="ml-4">FreeBayes</label><input id="id_vc_freebayes" class="checkbox-row" type="checkbox" name="FreeBayes">#}
+                        {#                        <label for="id_vc_haplotypecaller" class="ml-4">HaplotypeCaller</label><input id="id_vc_haplotypecaller" class="checkbox-row" type="checkbox" name="HaplotypeCaller">#}
+                        {#                        <label for="id_vc_manta" class="ml-4">Manta</label><input id="id_vc_manta" class="checkbox-row" type="checkbox" name="Manta">#}
+                        {#                        <label for="id_vc_mpileup" class="ml-4">mpileup</label><input id="id_vc_mpileup" class="checkbox-row" type="checkbox" name="mpileup">#}
+                        {#                        <label for="id_vc_strelka" class="ml-4">Strelka</label><input id="id_vc_strelka" class="checkbox-row" type="checkbox" name="Strelka"><br>#}
+                        {#                        <label for="id_vc_tiddit" class="ml-4">TIDDIT</label><input id="id_vc_tiddit" class="checkbox-row" type="checkbox" name="TIDDIT">#}
+                        {#                        <label for="id_vc_ascat" class="ml-4">ASCAT</label><input id="id_vc_ascat" class="checkbox-row" type="checkbox" name="ASCAT">#}
+                        {#                        <label for="id_vc_control-freec" class="ml-4">Control-FREEC</label><input id="id_vc_control-freec" class="checkbox-row" type="checkbox" name="Control-FREEC">#}
+                        {#                        <label for="id_vc_msisensor" class="ml-4">MSIsensor</label><input id="id_vc_msisensor" class="checkbox-row" type="checkbox" name="MSIsensor">#}
+                        {#                        <label for="id_vc_mutect2" class="ml-4">MUTECT2</label><input id="id_vc_mutect2" class="checkbox-row" type="checkbox" name="Mutect2">#}
+                    </div>
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="You can select multiple tools for the pipeline to run.">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" class="noBorder">Please select all annotation tools you would like to use:</td>
+            </tr>
+            <tr class="bottom-borderless">
+                <td class="noBorder" colspan="2">
+                    <table>
+                        <tr>
+                            <td class="noBorder"><label for="id_vc_snpeff" class="ml-4">snpEff</label></td>
+                            <td class="noBorder"><input id="id_vc_snpeff" class="checkbox-row" type="checkbox"
+                                                        name="snpEff"></td>
+                            <td class="noBorder"><label for="id_vc_vep" class="ml-4">VEP</label></td>
+                            <td class="noBorder"><input id="id_vc_vep" class="checkbox-row" type="checkbox" name="VEP">
+                            </td>
+                        </tr>
+                    </table>
+                    {#                    <div id="id_vc_tools" class="inline-group">#}
+                    {#                        <label for="id_vc_snpeff" class="ml-4">snpEff</label><input id="id_vc_snpeff" class="checkbox-row" type="checkbox" name="snpEff">#}
+                    {#                        <label for="id_vc_vep" class="ml-4">VEP</label><input id="id_vc_vep" class="checkbox-row" type="checkbox" name="VEP">#}
+                    {#                    </div>#}
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="You can select both tools to run them consecutively.">
+                </td>
+            </tr>
+            {#            <tr class="bottom-borderless">#}
+            {#                <td class="noBorder"><label for="id_anno_tools">Annotation tools:</label></td>#}
+            {#                <td class="noBorder"><select id="id_anno_tools" name="anno_tools[]" multiple style="height: 3.5em">#}
+            {#                    <option value="snpEff">snpEff</option>#}
+            {#                    <option value="VEP">VEP</option>#}
+            {#                </select></td>#}
+            {#                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"#}
+            {#                                            title="You can select both tools to run them consecutively.">#}
+            {#                </td>#}
+            {#            </tr>#}
+            </tbody>
         </table>
 
         <br><br>
@@ -273,6 +311,19 @@
                 alert("The pipeline will now start. This may take some time, so you can close this page and find your " +
                     "results later using the 'Find Results' tag.");
                 return true;
+            }
+        }
+
+        function extend_genome_options() {
+            // get checkbox
+            const checkbox = document.getElementById("id_own_genome");
+            // get tbody
+            const tbody = document.getElementById("id_reference_genome_options");
+
+            if (checkbox.checked === true) {
+                tbody.style.display = "";
+            } else {
+                tbody.style.display = "none";
             }
         }
     </script>
