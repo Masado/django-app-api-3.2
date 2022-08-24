@@ -10,6 +10,7 @@ dependencies:
   - bioconda::gffread
   - bioconda::bbmap=38.93
   - bioconda::hisat2=2.2.1
+#  - bioconda::bioconductor-genomeinfodbdata=1.2.6
   - bioconda::qualimap
   - bioconda::rsem
   - bioconda::rseqc=4.0.0

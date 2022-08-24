@@ -18,10 +18,10 @@ library(DESeq2)
 install.packages('igraph')
 install.packages('rjson')
 install.packages('foreach')
-BiocManager::install('netresponse')
+# BiocManager::install('netresponse')
 
 library(igraph)
-library(netresponse)
+# library(netresponse)
 
 # Atacseq
 install.packages('optparse')

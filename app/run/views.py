@@ -17,6 +17,8 @@ from .tasks import generate_and_check_id, check_for_run_dir, get_id_path, get_me
     store, handle_uploaded_file, handle_and_unzip, handle_and_untar, \
     untar_file, ungzip_file, unzip_file, mv_file, \
     download_file, download_tar, download_zip
+from .sanity import check_bed, check_gtf, check_fasta, check_rnaseq_samplesheet, check_atacseq_design, \
+    check_chipseq_design, check_sarek_design
 
 
 # basic views
@@ -44,6 +46,16 @@ def igenome_view(request, *args, **kwargs):
     template_name = 'run/igenome_list.html'
 
     return render(request, template_name)
+
+
+def input_problem_view(request, *args, **kwargs):
+    template_name = 'run/input_problems.html'
+
+    reason = kwargs["reason"]
+
+    context = {"reason": reason}
+
+    return render(request, template_name, context)
 
 
 # redirecting views
@@ -227,58 +239,58 @@ def spreadsheet_view(request, *args, **kwargs):
 ###########################################################
 # reference loader
 
-def reference_loader_view(request, *args, **kwargs):
-    # set template_name
-    template_name = 'run/gtf_loader.html'
-
-    if request.method == 'POST':
-
-        file_id = generate_and_check_id()
-        id_path = get_id_path(file_id, dest="file")
-        create_directory(id_path)
-
-        os.chdir(id_path)
-
-        organism_name = request.POST["org_name"]
-
-        select = request.POST["selector"]
-
-        from .app_settings import ENSEMBL_RELEASE, ENSEMBL_RELEASE_NUMBER
-
-        # if 'get_gtf' in request.POST:
-        if select == "gtf":
-            # get gtf annotation
-            from .tasks import rsync_file, ungzip_file
-            expected_org_name = organism_name.strip().lower().replace(" ", "_")
-            print("gaf_name: ", expected_org_name)
-            source = "rsync://ftp.ensembl.org/ensembl/pub/current_gtf/" + expected_org_name
-            destination = "."
-            get_out = '.' + ENSEMBL_RELEASE_NUMBER + ".gtf.gz"
-            rsync_type = "file"
-            gtf_file_compressed = rsync_file(source=source, destination=destination, getout=get_out, run_id=file_id,
-                                             rsync_type=rsync_type)
-            file_path = id_path + str(gtf_file_compressed)
-            return download_file(request, file_path)
-
-        # elif 'get_fasta' in request.POST:
-        elif select == "fasta":
-            # get gtf annotation
-            from .tasks import rsync_file, ungzip_file
-            expected_org_name = organism_name.strip().lower().replace(" ", "_")
-            print("gaf_name: ", expected_org_name)
-            source = "rsync://ftp.ensembl.org/ensembl/pub/current_fasta/" + expected_org_name + "/dna_index/"
-            destination = "."
-            get_out = ".dna.toplevel.fa.gz"
-            rsync_type = "file"
-            fasta_file_compressed = rsync_file(source=source, destination=destination, getout=get_out, run_id=file_id,
-                                               rsync_type=rsync_type)
-            file_path = id_path + str(fasta_file_compressed)
-            print("file_path: ", file_path)
-
-            return download_file(request, file_path)
-
-    # render page
-    return render(request, template_name)
+# def reference_loader_view(request, *args, **kwargs):
+#     # set template_name
+#     template_name = 'run/gtf_loader.html'
+#
+#     if request.method == 'POST':
+#
+#         file_id = generate_and_check_id()
+#         id_path = get_id_path(file_id, dest="file")
+#         create_directory(id_path)
+#
+#         os.chdir(id_path)
+#
+#         organism_name = request.POST["org_name"]
+#
+#         select = request.POST["selector"]
+#
+#         from .app_settings import ENSEMBL_RELEASE, ENSEMBL_RELEASE_NUMBER
+#
+#         # if 'get_gtf' in request.POST:
+#         if select == "gtf":
+#             # get gtf annotation
+#             from .tasks import rsync_file, ungzip_file
+#             expected_org_name = organism_name.strip().lower().replace(" ", "_")
+#             print("gaf_name: ", expected_org_name)
+#             source = "rsync://ftp.ensembl.org/ensembl/pub/current_gtf/" + expected_org_name
+#             destination = "."
+#             get_out = '.' + ENSEMBL_RELEASE_NUMBER + ".gtf.gz"
+#             rsync_type = "file"
+#             gtf_file_compressed = rsync_file(source=source, destination=destination, getout=get_out, run_id=file_id,
+#                                              rsync_type=rsync_type)
+#             file_path = id_path + str(gtf_file_compressed)
+#             return download_file(request, file_path)
+#
+#         # elif 'get_fasta' in request.POST:
+#         elif select == "fasta":
+#             # get gtf annotation
+#             from .tasks import rsync_file, ungzip_file
+#             expected_org_name = organism_name.strip().lower().replace(" ", "_")
+#             print("gaf_name: ", expected_org_name)
+#             source = "rsync://ftp.ensembl.org/ensembl/pub/current_fasta/" + expected_org_name + "/dna_index/"
+#             destination = "."
+#             get_out = ".dna.toplevel.fa.gz"
+#             rsync_type = "file"
+#             fasta_file_compressed = rsync_file(source=source, destination=destination, getout=get_out, run_id=file_id,
+#                                                rsync_type=rsync_type)
+#             file_path = id_path + str(fasta_file_compressed)
+#             print("file_path: ", file_path)
+#
+#             return download_file(request, file_path)
+#
+#     # render page
+#     return render(request, template_name)
 
 
 ###########################################################
@@ -352,11 +364,11 @@ class PostRNASeq(View):
 
             # check if directory already exists
             print("starting 'check_for_run_dir'")
-            # taken = check_for_run_dir(run_id)
-            # if taken is True:
-            #     return redirect('run:idTaken', run_id)
+
+            # check if run ID is already taken and redirect if necessary
             if check_for_run_dir(run_id):
-                return redirect('run:idTaken', run_id)
+                # return redirect('run:idTaken', run_id)
+                return render(request, 'run/id_taken.html', {'run_id': run_id})
 
             # create working directory
             create_directory(out)
@@ -446,7 +458,7 @@ class PostRNASeq(View):
             # deleting progress file
             del_file([".inprogress.txt"])
 
-            clean_wd()
+            # clean_wd()
 
             print("And thanks for all the fish!")
             # redirect to download- or fail-page, based on results
@@ -507,11 +519,11 @@ class PostAC(View):
 
         # check if directory already exists
         print("starting 'check_for_run_dir'")
-        # taken = check_for_run_dir(run_id)
-        # if taken is True:
-        #     return redirect('run:idTaken', run_id)
+
+        # check if run ID is already taken and redirect if necessary
         if check_for_run_dir(run_id):
-            return redirect('run:idTaken', run_id)
+            # return redirect('run:idTaken', run_id)
+            return render(request, 'run/id_taken.html', {'run_id': run_id})
 
         create_directory(id_path)
 
@@ -523,18 +535,24 @@ class PostAC(View):
         if 'bed_file' in request.FILES:
             bed_file = request.FILES['bed_file']
             handle_uploaded_file(bed_file, run_id)
+            if not check_bed(id_path + str(bed_file)):
+                return redirect("run:inputProblems", "bed")
         else:
             bed_file = None
 
         if 'gtf_file' in request.FILES:
             gtf_file = request.FILES['gtf_file']
             handle_uploaded_file(gtf_file, run_id)
+            if not check_gtf(id_path + str(gtf_file)):
+                return redirect("run:inputProblems", "gtf")
         else:
             gtf_file = None
 
         if 'fasta_file' in request.FILES:
             fasta_file = request.FILES['fasta_file']
             handle_uploaded_file(fasta_file, run_id)
+            if not check_gtf(id_path + str(fasta_file)):
+                return redirect("run:inputProblems", "fasta")
         else:
             fasta_file = None
 
@@ -666,11 +684,11 @@ class AtacSeqRun(View):
 
         # check if directory already exists
         print("starting 'check_for_run_dir'")
-        # taken = check_for_run_dir(run_id)
-        # if taken is True:
-        #     return redirect('run:idTaken', run_id)
+
+        # check if run ID is already taken and redirect if necessary
         if check_for_run_dir(run_id):
-            return redirect('run:idTaken', run_id)
+            # return redirect('run:idTaken', run_id)
+            return render(request, 'run/id_taken.html', {'run_id': run_id})
 
         # create working directory
         create_directory(id_path)
@@ -686,6 +704,8 @@ class AtacSeqRun(View):
             # get design_file and handle file
             design_file = request.FILES['design_file']
             handle_uploaded_file(request.FILES["design_file"], run_id)
+            if not check_atacseq_design(id_path + str(design_file)):
+                return redirect("run:inputProblems", "csv")
 
             # get file_folder, handle and decompress archive
             if 'file_folder' in request.FILES:
@@ -710,6 +730,8 @@ class AtacSeqRun(View):
             if 'fasta_file' in request.FILES:
                 fasta_file = request.FILES['fasta_file']
                 handle_uploaded_file(fasta_file, run_id)
+                if not check_fasta(id_path + str(fasta_file)):
+                    return redirect("run:inputProblems", "fasta")
             else:
                 fasta_file = None
             print("print fasta_file: ", fasta_file)
@@ -718,6 +740,8 @@ class AtacSeqRun(View):
             if 'gtf_annotation' in request.FILES:
                 gtf_annotation = request.FILES['gtf_annotation']
                 handle_uploaded_file(gtf_annotation, run_id)
+                if not check_gtf(id_path + str(gtf_annotation)):
+                    return redirect("run:inputProblems", "gtf")
             else:
                 gtf_annotation = None
 
@@ -725,6 +749,8 @@ class AtacSeqRun(View):
             if "bed_file" in request.FILES:
                 bed_file = request.FILES['bed_file']
                 handle_uploaded_file(bed_file, run_id)
+                if not check_bed(id_path + str(bed_file)):
+                    return redirect("run:inputProblems", "bed")
             else:
                 bed_file = None
 
@@ -1220,15 +1246,12 @@ class ChipSeqRun(View):
         id_path = get_id_path(run_id)  # id_path is nextflow's working directory in the media/run directory
 
         # check if directory already exists
-        check_for_run_dir(run_id)
-
-        # check if directory already exists
         print("starting 'check_for_run_dir'")
-        # taken = check_for_run_dir(run_id)
-        # if taken is True:
-        #     return redirect('run:idTaken', run_id)
+
+        # check if run ID is already taken and redirect if necessary
         if check_for_run_dir(run_id):
-            return redirect('run:idTaken', run_id)
+            # return redirect('run:idTaken', run_id)
+            return render(request, 'run/id_taken.html', {'run_id': run_id})
 
         # create working directory
         create_directory(id_path)
@@ -1242,6 +1265,8 @@ class ChipSeqRun(View):
         # get design_file and handle file
         design_file = request.FILES['design_file']
         handle_uploaded_file(design_file, run_id)
+        if not check_chipseq_design(id_path + str(design_file)):
+            return redirect("run:inputProblems", "csv")
 
         # get file_folder, handle and decompress
         if 'file_folder' in request.FILES:
@@ -1269,6 +1294,8 @@ class ChipSeqRun(View):
         if "fasta_file" in request.FILES:
             fasta_file = request.FILES['fasta_file']
             handle_uploaded_file(fasta_file, run_id)
+            if not check_fasta(id_path + str(fasta_file)):
+                return redirect("run:inputProblems", "fasta")
         else:
             fasta_file = None
 
@@ -1276,6 +1303,8 @@ class ChipSeqRun(View):
         if "gtf_file" in request.FILES:
             gtf_file = request.FILES['gtf_file']
             handle_uploaded_file(gtf_file, run_id)
+            if not check_gtf(id_path + str(gtf_file)):
+                return redirect("run:inputProblems", "gtf")
         else:
             gtf_file = None
 
@@ -1283,6 +1312,8 @@ class ChipSeqRun(View):
         if "bed_file" in request.FILES:
             bed_file = request.FILES['bed_file']
             handle_uploaded_file(bed_file, run_id)
+            if not check_bed(id_path + str(bed_file)):
+                return redirect("run:inputProblems", "bed")
         else:
             bed_file = None
 
@@ -1460,11 +1491,12 @@ class RnaSeqRun(View):
 
         # check if directory already exists
         print("starting 'check_for_run_dir'")
-        # taken = check_for_run_dir(run_id)
-        # if taken is True:
-        #     return redirect('run:idTaken', run_id)
+
+        # check if run ID is already taken and redirect if necessary
         if check_for_run_dir(run_id):
-            return redirect('run:idTaken', run_id)
+            # return redirect('run:idTaken', run_id)
+            return render(request, 'run/id_taken.html', {'run_id': run_id})
+
 
         # create working directory
         create_directory(id_path)
@@ -1478,6 +1510,9 @@ class RnaSeqRun(View):
         # get csv_file and handle file
         csv_file = request.FILES['csv_file']
         handle_uploaded_file(request.FILES['csv_file'], run_id)
+        if not check_rnaseq_samplesheet(id_path + str(csv_file)):
+            return redirect("run:inputProblems", "csv")
+
 
         # get file_folder, handle and decompress file
         if 'file_folder' in request.FILES:
@@ -1508,6 +1543,8 @@ class RnaSeqRun(View):
         if 'fasta_file' in request.FILES:
             fasta_file = request.FILES['fasta_file']
             handle_uploaded_file(fasta_file, run_id)
+            if not check_fasta(id_path + str(fasta_file)):
+                return redirect("run:inputProblems", "fasta")
         else:
             fasta_file = None
 
@@ -1515,6 +1552,8 @@ class RnaSeqRun(View):
         if 'gtf_file' in request.FILES:
             gtf_file = request.FILES['gtf_file']
             handle_uploaded_file(gtf_file, run_id)
+            if not check_gtf(id_path + str(gtf_file)):
+                return redirect("run:inputProblems", "gtf")
         else:
             gtf_file = None
 
@@ -1522,6 +1561,8 @@ class RnaSeqRun(View):
         if 'bed_file' in request.FILES:
             bed_file = request.FILES['bed_file']
             handle_uploaded_file(bed_file, run_id)
+            if not check_bed(id_path + str(bed_file)):
+                return redirect("run:inputProblems", "bed")
         else:
             bed_file = None
 
@@ -1529,6 +1570,8 @@ class RnaSeqRun(View):
         if 'transcript_fasta' in request.FILES:
             transcript_fasta = request.FILES['transcript_fasta']
             handle_uploaded_file(transcript_fasta, run_id)
+            if not check_fasta(id_path + str(fasta_file)):
+                return redirect("run:inputProblems", "fasta")
         else:
             transcript_fasta = None
 
@@ -1585,6 +1628,13 @@ class RnaSeqRun(View):
         else:
             pseudo_salmon_value = False
 
+        test_post_rnaseq = request.POST.get('post_rnaseq')
+        print("test_post_rnaseq:", test_post_rnaseq)
+        if request.POST.get('post_rnaseq'):
+            print("post_rnaseq is True")
+        else:
+            print("post_rnaseq is False")
+
         if 'post_rnaseq' in request.POST:
             post_rnaseq = True
         else:
@@ -1593,8 +1643,8 @@ class RnaSeqRun(View):
         if post_rnaseq is True:
             pseudo_salmon_value = True
 
-        # if aligner == "star_salmon":
-        #     pseudo_salmon_value = False
+        if aligner == "star_salmon":
+            pseudo_salmon_value = False
 
         print("pseudo_salmon_value: ", pseudo_salmon_value)
 
@@ -1720,7 +1770,7 @@ class RnaSeqRun(View):
                 # deleting progress file
                 del_file([".inprogress.txt"])
 
-                clean_wd()
+                # clean_wd()
 
                 # redirect to download- or fail-page, based on results
                 if result != 0:
@@ -1729,6 +1779,7 @@ class RnaSeqRun(View):
                     return redirect('/run/fail_' + run_id + '_' + result + '/')
                 else:
                     # redirect to download page
+                    print("And thanks for all the fish!")
                     return redirect('/run/download_' + run_id + '/')
         else:
             from .tasks import del_file
@@ -1772,11 +1823,10 @@ class SarekRun(View):
 
         # check if directory already exists
         print("starting 'check_for_run_dir'")
-        # taken = check_for_run_dir(run_id)
-        # if taken is True:
-        #     return redirect('run:idTaken', run_id)
+        # check if run ID is already taken and redirect if necessary
         if check_for_run_dir(run_id):
-            return redirect('run:idTaken', run_id)
+            # return redirect('run:idTaken', run_id)
+            return render(request, 'run/id_taken.html', {'run_id': run_id})
 
         # create working directory
         create_directory(id_path)
@@ -1790,6 +1840,8 @@ class SarekRun(View):
         # get tsv_file and handle file
         tsv_file = request.FILES['tsv_file']
         handle_uploaded_file(request.FILES['tsv_file'], run_id)
+        if not check_tsv(id_path + str(tsv_file)):
+            return redirect("run:inputProblems", "tsv")
 
         # get file_folder, handle and decompress
         if 'file_folder' in request.FILES:
@@ -1825,6 +1877,8 @@ class SarekRun(View):
             fasta_file = request.FILES['fasta_file']
             handle_uploaded_file(fasta_file, run_id)
             print("fasta_file was provided")
+            if not check_fasta(id_path + str(fasta_file)):
+                return redirect("run:inputProblems", "fasta")
         else:
             fasta_file = None
             print("fasta_file was not provided")
@@ -1976,11 +2030,11 @@ class CrisprCasView(View):
 
         # check if directory already exists
         print("starting 'check_for_run_dir'")
-        # taken = check_for_run_dir(run_id)
-        # if taken is True:
-        #     return redirect('run:idTaken', run_id)
+
+        # check if run ID is already taken and redirect if necessary
         if check_for_run_dir(run_id):
-            return redirect('run:idTaken', run_id)
+            # return redirect('run:idTaken', run_id)
+            return render(request, 'run/id_taken.html', {'run_id': run_id})
 
         # create working directory
         create_directory(id_path)
@@ -2001,6 +2055,8 @@ class CrisprCasView(View):
         # get the fasta_file to build the BLAST database
         db_fasta = request.FILES['data_base_fasta']
         handle_uploaded_file(db_fasta, run_id)
+        if not check_fasta(id_path + str(db_fasta)):
+            return redirect("run:inputProblems", "fasta")
 
         # get the sequence type for the database
         db_type = request.POST['db_type']
@@ -2026,7 +2082,11 @@ class CrisprCasView(View):
         tar_file("results.tar.gz", "results/")
         zip_file("results.zip", "results/")
 
-        clean_wd()
+        from .tasks import del_file
+        # deleting progress file
+        del_file([".inprogress.txt"])
+
+        # clean_wd()
 
         # redirect to download or fail page, based on pipeline results
         if result != 0:

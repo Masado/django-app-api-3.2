@@ -1,80 +1,23 @@
 #!/usr/bin/env nextflow
 
-// nextflow run post_rnaseq_pipeline_scripts_directory_extended_modified_testing_django.nf --fasta data/reads/*_R{1,2}.fastq --samples samples_extended.txt --salmon data/salmon/ --compare data/compare.tsv --annotation data/Sus_scrofa.Sscrofa11.1.98.gtf --scripts ../scripts/ --species 9823 --geneFile Gallus_gallus_R11_Pathway_1.sif --query test_out/Gallus_gallus_Pathway_1_genes.txt --organism test_out/species.txt --org_tex test_out/species.tex --out test_out --network test_out/StringNetwork-Gallusgallus_reduced.sif --pathways 3 --kmin 0 --kmax 5 --kstep 1 --lmin 0 --lmax 3 --lstep 1
-
-// nextflow run post_rnaseq_pipeline_scripts_directory_extended_modified_testing_django.nf --samples prepared_data/1-samples_extended.txt --salmon prepared_data/salmon --compare prepared_data/3-chicken_compare.tsv --geneFile prepared_data/4-Gallus_gallus_R11_Pathway_1.sif --annotation prepared_data/5-Gallus_gallus.GRCg6a.98.gtf --network prepared_data/6-StringNetwork-Gallusgallus_reduced.sif --tx2 prepared_data/7-tx2gene.csv --scripts scripts/ --species-id 9031 --organism "Gallus gallus" --pathways 3 --kmin 0 --kmax 3 --kstep 1 --lmin 0 --lmax 3 --lstep 1 --out out/
-
-// chicken species id - 9031
-
-
-//params.reads = 'test/data/reads/*_R{1,2}.fastq'
-//params.ref = 'test/data/reference/Gallus_gallus.GRCg6a.98.gtf'
-//params.fasta = 'test/data/reference/Gallus_gallus.GRCg6a.dna.toplevel.fa'
-//params.samples = 'test/samples_extended.txt'
-//params.salmon = 'test/results_chicken_first40_test/salmon/'
-//params.tx2 = 'test/results_chicken_first40_test/salmon/tx2gene.csv'
-//params.compare = 'test/chicken_compare.tsv'
-//params.annotation = 'test/data/reference/Gallus_gallus.GRCg6a.98.gtf'
-//params.scripts = 'test/scripts/'
-//params.species = '9031'
-//params.geneFile = 'test/test_out/Gallus_gallus_R11_Pathway_1.sif'
-//params.query = 'test/test_out/Gallus_gallus_Pathway_1_genes.txt'
-//params.organism = 'test/test_out/species.txt'
-//params.out = 'test/test_out'
-//params.network = 'test/test_out/StringNetwork-Gallusgallus_reduced.sif'
-//params.pathways = 3
-//params.kmin = 0
-//params.kmax = 5
-//params.kstep = 1
-//params.lmin = 0
-//params.lmax = 3
-//params.lstep = 1
-//params.org_tex = 'test/test_out/species.tex'
-//params.tex_image = 'test/test_out/tex_files/images'
-//params.the_tex = 'test/test_out/tex_files/report4.tex'
-
-//reads_ch = Channel.fromPath(params.reads)
-//fasta_ch = Channel.fromPath(params.fasta)
-//ref_ch = Channel.fromPath(params.ref)
-
-// sample files
 samples_ch = Channel.fromPath(params.samples)
 
-// salmon-output files
 Channel.fromPath(params.salmon).into {salmonOut_ch1; salmonOut_ch2}
 
-// tx2-gene files
 tx2_ch = Channel.from(params.tx2)
 
-// compare files
 compare_ch = Channel.fromPath(params.compare)
 
-// annotation files
 anno_ch = Channel.fromPath(params.annotation)
 
-// distribute the scripts-directory to the processes
 Channel.fromPath(params.scripts).into {scripts_ch1; scripts_ch2; scripts_ch3; scripts_ch4; scripts_ch5; scripts_ch6}
 
-//deseq_ch = Channel.fromPath(params.deseq)
-//matrix_ch = Channel.fromPath(params.matrix)
-//id_table_ch = Channel.fromPath(params.id_table)
-
-//species_ch = Channel.from(params.species)
-
-// distribute species informaton to processes
 Channel.from(params.species).into {species_ch1; species_ch2; species_ch3; species_ch4; species_ch5}
 
 Channel.from(params.organism).into { org_ch; org_ch2; org_ch3 }
 
-// distribute output-directory to processes
 Channel.fromPath(params.out).into {out_ch1; out_ch2; out_ch3; out_ch4; out_ch5; out_ch6; out_ch7; out_ch8; out_ch9; out_ch10; out_ch11; out_ch12; out_ch13; out_ch14; out_ch15; out_ch16}
 
-//query_ch = Channel.fromPath(params.query)
-
-// gene file pathway network
-// geneFile_ch = Channel.fromPath(params.geneFile)
-
-// reduced String Network
 network_ch = Channel.fromPath(params.network)
 
 // KeypathwayMiner values
@@ -86,37 +29,7 @@ lmin_ch = Channel.from(params.lmin)
 lmax_ch = Channel.from(params.lmax)
 lstep_ch = Channel.from(params.lstep)
 
-//org_tex_ch = Channel.fromPath(params.org_tex)
-//tex_image_ch = Channel.fromPath(params.tex_image)
-
-//the_tex_ch = Channel.fromPath(params.the_tex)
-
-//process RNASeq {
-//	publishDir "$o", mode: 'copy', overwrite: true
-//	
-//	input:
-//	val o from out_ch8
-//	val reference from ref_ch
-//	file read from reads_ch
-//	file fasta from fasta_ch
-//	
-//	output:
-//	file 'tx2gene.csv' into tx2_ch
-//	val '$o/*/salmon' into salmonOut_ch
-//	
-//	shell:
-//	"""
-//	nextflow run nf-core/rnaseq --pseudo_aligner salmon --singleEnd --reads $fasta --gtf $reference --fasta $fasta --outDir $o
-//	"""
-//
-//}
-
-//salmonOut_ch.into {
-//	salmonOut_ch1; salmonOut_ch2
-//}
-
 process preparation {
-//	echo true
 	publishDir "$o", mode: 'copy', overwrite: true
 
 	input:
@@ -150,7 +63,6 @@ process org_extraction {
 	val organism from org_ch
 	
 	output:
-	// val out_org into gpOrg_ch
 	path 'org.txt' into gpOrg_ch
 	
 	shell:
@@ -244,7 +156,6 @@ process tex_generation {
 	input: 
 	val species from org_ch2
 	val o from out_ch11
-//	val x from prep_done_ch
 
 	output:
 	file 'species.tex' into org_tex_ch2
@@ -254,40 +165,6 @@ process tex_generation {
 	echo !{species} | tee species.tex
 	'''
 }
-
-process txt_generation {
-	publishDir "$o", mode: 'copy', overwrite: true
-	
-	input: 
-	val organism from org_ch3
-	val o from out_ch12
-	
-	output:
-	file 'organism.txt' into organism_ch
-	
-	shell:
-	'''
-	echo !{organism} | tee organism.txt
-	'''
-}
-
-// Process generates a tex-file containing the provided species name to pass name to tex-generation
-//process species_tex_generation {
-//	publishDir "$o", moder 'copy', overwrite: true
-//
-//	input:
-//	val species from species_ch4
-//	val o from out_ch12
-//
-//	output:
-//	file 'species.tex' into org_tex_ch
-//
-//	shell:
-//	'''
-//	echo "$species" | tee species.tex
-//	'''
-//}
-
 
 process gprofiler {
 	publishDir "$o/images/", mode: 'copy', overwrite: true
@@ -299,7 +176,6 @@ process gprofiler {
 	val o from out_ch5
 	
 	output:
-//	file '*_gProfiler_plot.png' into void_ch
 	file 'gProfiler_plot.png' optional true into gProfilerPlot_ch
 	val 4 into copy_wait_ch
 	
@@ -336,26 +212,6 @@ process KeyPathwayMiner{
 	"""
 }
 
-//process texAssembly {
-//	publishDir "$o", mode: 'copy', overwrite: true
-//	
-//	input:
-//	val o from out_ch9
-//	val species_tex from org_tex_ch
-//	val images from tex_image_ch
-//	val scripts from scripts_ch6
-//	val kpm from tex_wait_ch
-//	
-//	
-//	output:
-//	val 'report4.tex' into tex_ch
-//
-//	"""
-//	$scripts/assemble_tex_v4.py --images $images --out $o/tex_files
-//	"""
-//
-//}
-
 process copy_images {
 	publishDir "$o", mode: 'copy', overwrite: true
 	
@@ -373,24 +229,19 @@ process copy_images {
 	'''
 }
 
-process texAssembly2 {
+process texAssembly {
 	publishDir "$o", mode: 'copy', overwrite: true
 	
 	input:
 	val o from out_ch9
 	val species_tex from org_tex_ch2
-//	val images from tex_image_ch
 	val scripts from scripts_ch6
 	val kpm from tex_wait_ch
 	val c from tex_wait_ch2
 	
 	output:
 	val 'report.tex' into tex_ch
-
-//	"""
-//	$scripts/assemble_tex_v5.py --images $images --out $o/tex_files
-//	"""
-
+	
 	"""
 	$scripts/assemble_tex_v5.py --images $o/images --out $o/tex_files
 	"""

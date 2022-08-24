@@ -36,17 +36,24 @@ if (is.na(match("--organism", args_tag))) {
 # load data
 # query <- read_lines("../test_out/Gallus_gallus_Pathway_1_genes.txt")
 query <- read_lines(file.path(if (substr(args_value[match("--query", args_tag)], 1, 1) == "/") args_value[match("--query", args_tag)]else paste(getwd(), "/", args_value[match("--query", args_tag)],sep = "")))
-# organism <- read_lines("../test_out/species.txt")
-organism <- read_lines(file.path(if (substr(args_value[match("--organism", args_tag)], 1, 1) == "/") args_value[match("--organism", args_tag)]else paste(getwd(), "/", args_value[match("--organism", args_tag)],sep = "")))
+# organism <- read_lines(file.path(if (substr(args_value[match("--organism", args_tag)], 1, 1) == "/") args_value[match("--organism", args_tag)]else paste(getwd(), "/", args_value[match("--organism", args_tag)],sep = "")))
+if(!exists("organism")){
+  organism <- if(substr(args_value[match("--organism", args_tag)], 1, 1) == "/") args_value[match("--organism", args_tag)]else paste(args_value[match("--organism", args_tag)])
+}
 if(!exists("out")){
   out <- if(substr(args_value[match("--out", args_tag)], 1, 1) == "/") args_value[match("--out", args_tag)]else paste(args_value[match("--out", args_tag)])
 }
+
+spl <- strsplit(organism, "\\s+")
+spl[[1]][1] <- tolower(spl[[1]][1])
+name <- paste(substr(spl[[1]][1],1,1), spl[[1]][2], sep="")
 
 #gene_data <- gProfileR2::gprofiler(query, organism)
 
 ## generate manhattan-like plot
 # genereate gost
-g.gost <- gost(query, organism)
+# g.gost <- gost(query, organism)
+g.gost <- gost(query, name)
 
 ## prepare, generate and export image of plot
 # generate output appendix

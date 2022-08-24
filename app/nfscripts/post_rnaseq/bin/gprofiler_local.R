@@ -38,11 +38,16 @@ if (is.na(match("--organism", args_tag))) {
 query <- read_lines(file.path(if (substr(args_value[match("--query", args_tag)], 1, 1) == "/") args_value[match("--query", args_tag)]else paste(getwd(), "/", args_value[match("--query", args_tag)],sep = "")))
 # organism <- read_lines("../test_out/species.txt")
 organism <- read_lines(file.path(if (substr(args_value[match("--organism", args_tag)], 1, 1) == "/") args_value[match("--organism", args_tag)]else paste(getwd(), "/", args_value[match("--organism", args_tag)],sep = "")))
+# if(!exists("organism")){
+#   organism <- if(substr(args_value[match("--organism", args_tag)], 1, 1) == "/") args_value[match("--organism", args_tag)]else paste(args_value[match("--organism", args_tag)])
+# }
 if(!exists("out")){
   out <- if(substr(args_value[match("--out", args_tag)], 1, 1) == "/") args_value[match("--out", args_tag)]else paste(args_value[match("--out", args_tag)])
 }
 
-#gene_data <- gProfileR2::gprofiler(query, organism)
+# spl <- strsplit(organism, "\\s+")
+# spl[[1]][1] <- tolower(spl[[1]][1])
+# name <- paste(substr(spl[[1]][1],1,1), spl[[1]][2], sep="")
 
 ## generate manhattan-like plot
 # genereate gost

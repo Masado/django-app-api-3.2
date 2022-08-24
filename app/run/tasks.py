@@ -456,6 +456,12 @@ def download_file(request, file_path):
                 response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(
                     file_path)
                 return response
+        elif file_extension == ".zip":
+            with open(file_path, 'rb') as fh:
+                response = HttpResponse(fh.read(), content_type="application/zip")
+                response['Content-Disposition'] = 'inline; filename=' + os.path.basename(
+                    file_path)
+                return response
     raise Http404
 
 
@@ -512,3 +518,20 @@ def download_tutorial(request, pipe, file):
                 "It appears this pipeline does not yet have a functioning tutorial-archive.\n" +
                 "We apologize for the inconvenience")
         raise Http404
+
+
+def clean_runs():
+    import datetime as DT
+    from .models import Run
+    td = DT.date.today()
+    max_age = td - DT.timedelta(days=14)
+    delete_runs = Run.objects.filter(start_time__lt=max_age)
+    for run in delete_runs:
+        id = run.run_id
+        id_path = get_id_path(run_id=id, dest="run")
+        if os.path.exists(id_path):
+            os.remove(id_path)
+        else:
+            print("Path was not found")
+        run.delete()
+

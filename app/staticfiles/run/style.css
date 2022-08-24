@@ -1,4 +1,4 @@
-table {
+.table {
     border: 1px;
     border-collapse: collapse;
     border-spacing: 10px;
@@ -168,6 +168,10 @@ fieldset {
 
 input[type=number].text-like {
     -moz-appearance: textfield;
+}
+
+table.table-collapse {
+    border-collapse: collapse;
 }
 
  /*******************************************************************************************************************/

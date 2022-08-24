@@ -23,5 +23,6 @@ services:
       - POSTGRES_PASSWORD=next_django
       - POSTGRES_DB=next_django_dev
 
+
 volumes:
   postgres_data_dev:

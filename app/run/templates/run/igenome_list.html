@@ -2,8 +2,7 @@
 
 {% block title %}iGenome reference genomes{% endblock %}
 {% load static %}
-{% block extrahead %}
-    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+{% block extrahead %}<link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
 
 {% block content %}
 
@@ -21,8 +20,8 @@
     <table>
         <thead>
             <tr>
-                <th class="pl-4"><input type="text" class="search-input" placeholder="Genome"></th>
-                <th class="pl-4"><input type="text" class="search-input" placeholder="Species"></th>
+                <th class="noBorder pl-4"><input type="text" class="search-input" placeholder="Genome"></th>
+                <th class="noBorder pl-4"><input type="text" class="search-input" placeholder="Species"></th>
             </tr>
         </thead>
         <tbody>

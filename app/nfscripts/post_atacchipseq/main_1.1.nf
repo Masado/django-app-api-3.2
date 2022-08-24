@@ -40,7 +40,7 @@ if (params.bam) {
 		ch_bam_chr = Channel.fromPath(params.bam)
 		} else { 
 			ch_extract_chromosomes_bam = Channel.empty() 
-			ch_bam_chr = Channel.empry()
+			ch_bam_chr = Channel.empty()
 			}
 	} else { 
 		ch_bam = Channel.empty() 
@@ -194,17 +194,17 @@ process MATRIX_GENERATION_COLLECTED {
 	
 	script:
 	if (!(params.scale_regions)) {
-	"""
-	computeMatrix reference-point \\
-		-S $bigwig \\
-		-R $bed \\
-		-b "${params.upstream}" -a "${params.downstream}" \\
-		--referencePoint ${params.reference_point} \\
-		--missingDataAsZero \\
-		--outFileName matrix_collected_rp.gz \\
-		--outFileNameMatrix matrix_collected_rp_vals.mat.tab \\
-		--outFileSortedRegions regions_collected_rp.bed
-	"""
+		"""
+		computeMatrix reference-point \\
+			-S $bigwig \\
+			-R $bed \\
+			-b "${params.upstream}" -a "${params.downstream}" \\
+			--referencePoint ${params.reference_point} \\
+			--missingDataAsZero \\
+			--outFileName matrix_collected_rp.gz \\
+			--outFileNameMatrix matrix_collected_rp_vals.mat.tab \\
+			--outFileSortedRegions regions_collected_rp.bed
+		"""
 	} else {
 		"""
 		computeMatrix scale-regions \\

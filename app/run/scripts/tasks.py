@@ -36,6 +36,28 @@ def run_pipe(command, shell_bo=False, start_msg="Starting nextflow pipeline...",
         return process.returncode
 
 
+def get_memory():
+    with open('/proc/meminfo', 'r') as mem:
+        free_memory = 0
+        max_memory = 0
+        for i in mem:
+            sline = i.split()
+            if str(sline[0]) in ('MemFree:', 'Buffers:', 'Cached:'):
+                free_memory += int(sline[1])
+            elif str(sline[0]) == 'MemTotal:':
+                max_memory = int(sline[1])
+    free_memory = (free_memory / 1e+6) / 2
+    max_memory = max_memory / 1e+6
+    if free_memory > max_memory / 4:
+        free_memory = max_memory / 4
+    return int(free_memory)
+
+
+def get_cpus():
+    from multiprocessing import cpu_count
+    return int(cpu_count() / cpu_count())
+
+
 # Create a logger
 logging.basicConfig(format='%(name)s - %(asctime)s %(levelname)s: %(message)s')
 tx2logger = logging.getLogger(__file__)

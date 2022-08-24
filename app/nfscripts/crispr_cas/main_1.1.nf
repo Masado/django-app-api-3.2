@@ -47,6 +47,8 @@ process unzip {
 
 //Prozess zum Detektieren der CRISPR-Kassetten mit CRT (Crisper-Recognition-Tool)
 process detectionCRT {
+
+	publishDir "${params.outdir}/detectionCRT", mode: 'copy'
         				
 	input:
 	file undetected from fna_ch
@@ -80,6 +82,8 @@ process getHeader {
 //Prozess zum Parsen des CRT-Outputs in diverse Fasta-Dateien
 process parseCRToutput {
 
+        publishDir "${params.outdir}/parseCRT", mode: 'copy'
+
         input:
         file toparse from crt_parser_ch
 
@@ -97,6 +101,8 @@ process parseCRToutput {
 
 //Prozess zum mergen aller Spacer des CRT-Outputs in eine Fasta-Datei
 process mergeSpacer {
+
+	publishDir "${params.outdir}/merge", mode: 'copy'
 	
 	input:
 	file spacer from spacer_ch.collect()
@@ -132,6 +138,8 @@ process mergeRepeats {
 //Prozess zum mergen der CRISPR-Kassetten in eine Fasta-Datei
 process mergeCrisprCas {
 
+	publishDir "${params.outdir}/merge", mode: 'copy'
+
         input:
         file crispr_cas from crispr_cas_ch.collect()
 
@@ -147,6 +155,8 @@ process mergeCrisprCas {
 
 //Prozess zur Anwendung von blastn auf die merged Spacer-Datei
 process blastSpacer {
+
+	publishDir "${params.outdir}/Blast", mode: 'copy'
 
         input:
         file mergedSpacer from mergedSpacer_ch
@@ -168,6 +178,8 @@ process blastSpacer {
 
 //Prozess zum parsen des BLAST-Outputs in eine FNA-Dateien
 process parseBlastOutputtoFNA {
+
+	publishDir "${params.outdir}/parseBlast", mode: 'copy'
 
 	input:
 	file "blastedSpacer.xml" from blastedSpacer_toFNA_ch
@@ -198,12 +210,14 @@ process htmlResult {
 
 	script:
 	"""
-	echo "I'm here to make sure the script is executed. If you are looking at this probalby something broke."
+	echo "I'm here to make sure the script is executed. If you are looking at this probably something broke."
 	"""
 }
 
 //Prozess für multiple Sequenz-Alignments der einzelnen Query-Hit Paare
 process clustalwSpacers {
+
+	publishDir "${params.outdir}/clutsalw/Spacers", mode: 'copy'
 
 	input:	
 	file toclust from spacer_blast_hits_ch.collect()
@@ -237,6 +251,8 @@ process mergeSpacerMSAs {
 
 //Prozess für multiple Sequenz Alignments der merged Crispr Kassetten
 process clustalwProcessMergedCrisprCas {
+
+	publishDir "${params.outdir}/clutsalw/CRISPR", mode: 'copy'
 
 	input:
 	file clustalwed_CRISPR from mergedCrisprCas_ch
@@ -276,6 +292,8 @@ process phylTree {
 
 //Prozess zur Anwendung des Needleman-Wunsch-Algorithmus auf den CRT-output
 process needlemanWunschCRTOutput {
+
+	publishDir params.outdir + "needlemanwunsch/", mode: 'copy'
 	
 	input:
 	file toNeedle from crt_output_ch

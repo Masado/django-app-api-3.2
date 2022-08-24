@@ -1,5 +1,5 @@
 from django.conf import settings
-from ..tasks import run_pipe
+from ..tasks import run_pipe, get_memory, get_cpus
 from ...models import Run
 
 import logging
@@ -16,12 +16,15 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
 
     print("Starting nextflow pipeline...")
     command = ['nextflow', 'run',
-               '%s' % script_location,
-               # 'nf-core/atacseq',
-               # '-profile', 'conda',
-               '--input', '%s' % design_file, '--max_memory', '4.GB', '--max_cpus', '4'
-               #  , '--outdir', '%s' % outdir,
-               ]
+        '%s' % script_location,
+        # 'nf-core/atacseq',
+        '--input', '%s' % design_file,
+        # '--max_memory', '4.GB',
+        '--max_memory', '%s.GB' % str(get_memory()),
+        # '--max_cpus', '4'
+        '--max_cpus', '%s' % str(get_cpus())
+        #  , '--outdir', '%s' % outdir,
+    ]
     if single_end == 'true':
         command.extend(['--single_end', 'True'])
     else:
@@ -72,11 +75,14 @@ def rnaseq(
 ):
     scirpt_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/rnaseq/main.nf"
 
+
     command = ['nextflow', 'run',
-               'nf-core/rnaseq',
-               '-r', '3.4',
-               '--input', '%s' % csv_file,
-               '--max_memory', '4.GB', '--max_cpus', '4']
+        'nf-core/rnaseq',
+        '-r', '3.5',
+        '--input', '%s' % csv_file,
+        '--max_memory', '%s.GB' % str(get_memory()),
+        '--max_cpus', '%s' % str(get_cpus())
+    ]
     if umi_value is True:
         command.extend(['--with_umi', 'True', '--umitools_extract_method', '%s' % umi_method, '--umitools_bc_pattern',
                         '%s' % umi_pattern])
@@ -115,8 +121,9 @@ def rnaseq(
 
     m_env = os.environ.copy()
     if bool(settings.DEBUG):
-        m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin" \
-                                        ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin"
+        m_env["PATH"] = m_env["PATH"] + 
+        ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin" \
+       	":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin"
     else:
         m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin" \
                                         ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin"
@@ -145,7 +152,10 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
         # '-profile', 'docker',
         # '-profile', 'conda',
         '--input', '%s' % design_file,
-        '--max_memory', '4.GB', '--max_cpus', '4'
+        # '--max_memory', '4.GB',
+        '--max_memory', '%s.GB' % str(get_memory()),
+        # '--max_cpus', '4'
+        '--max_cpus', '%s' % str(get_cpus())
     ]
     if single_end is True:
         command.extend(['--single_end', 'True'])
@@ -199,11 +209,15 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
           ):
     script_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/sarek/main.nf"
     command = ['nextflow', 'run',
-               # '%s' % script_location,
-               'nf-core/sarek',
-               '--input', '%s' % tsv_file, '--max_memory', '4.GB', '--max_cpus', '4'
-               # , '--skip_qc', 'bamqc,BaseRecalibrator'
-               ]
+        # '%s' % script_location,
+        'nf-core/sarek',
+        '--input', '%s' % tsv_file,
+        # '--max_memory', '4.GB',
+        '--max_memory', '%s.GB' % str(get_memory()),
+        # '--max_cpus', '4'
+        '--max_cpus', '%s' % str(get_cpus())
+        # , '--skip_qc', 'bamqc,BaseRecalibrator'
+    ]
     if igenome_reference is not None:
         command.extend(['--genome', '%s' % igenome_reference])
     if dbsnp is not None:
@@ -264,7 +278,10 @@ def atacseq_advanced(
 ):
     command = [
         'nextflow', 'run', 'nf-core/atacseq',
-        '--max_memory', '8.GB', '--max_cpus', '8'
+        # '--max_memory', '4.GB',
+        '--max_memory', '%s.GB' % str(get_memory()),
+        # '--max_cpus', '4'
+        '--max_cpus', '%s' % str(get_cpus())
     ]
     if run_name is not None:
         command.extend(['-name', '%s' % run_name])

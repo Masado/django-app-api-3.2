@@ -19,7 +19,7 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
     scripts_dir = base_dir + '/nfscripts/post_rnaseq/scripts/'
     pipe_location = (
             base_dir +
-            '/nfscripts/post_rnaseq/post_rnaseq_pipeline_scripts_directory_extended_modified_testing_django_1.1.nf'
+            '/nfscripts/post_rnaseq/post_rnaseq_pipeline_scripts_directory_extended_modified_testing_django_1.2.nf'
     )
     command = ['nextflow', 'run',
                pipe_location,

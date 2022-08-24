@@ -35,6 +35,7 @@ urlpatterns = [
     path('detail/<run_id>/', views.detail_view, name='detail'),
     path('igenome/', views.igenome_view, name='iGenome'),
     path('sheets/', views.spreadsheet_view, name='Spreadsheets'),
-    path('references/', views.reference_loader_view, name='ReferenceLoader'),
+    path('inputproblem?=<reason>/', views.input_problem_view, name='inputProblems'),
+    # path('references/', views.reference_loader_view, name='ReferenceLoader'),
 
 ]

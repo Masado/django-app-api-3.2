@@ -12,7 +12,7 @@
 {#                {% block nav-run %}<a class="nav-a" href="{% url 'run:index' %}" title="Same function as 'Find pipeline' button on Home page">Run</a>{% endblock %}#}
                 {% block nav-results-download %}<a class="nav-a" href="{% url 'run:getDownload' %}" title="Will take you to a page where you can find the results of your run">Find Results</a>{% endblock %}
                 {% block nav-spreadsheet %}<a class="nav-a" href="{% url 'run:Spreadsheets' %}" title="Spreadsheet generator" >Spreadsheets</a>{% endblock %}
-                {% block nav-referenceloader %}<a class="nav-a" href="{% url 'run:ReferenceLoader' %}" title="Reference Loader" >Reference Loader</a>{% endblock %}
+                {% block nav-referenceloader %}<a class="nav-a" href="{% url 'fetcher:fetcher' %}" title="Reference Fetcher" >Reference Fetcher</a>{% endblock %}
                 {% block nav-about %}<a class="nav-a" href="{% url 'about' %}">About</a>{% endblock %}
                 {% block nav-contact %}<a class="nav-a" href="{% url 'contact' %}">Contact</a>{% endblock %}
             </div>

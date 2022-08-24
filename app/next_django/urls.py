@@ -18,7 +18,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from pages.views import home_view, about_view, contact_view
+from pages.views import home_view, about_view, contact_view #, image_upload
 
 urlpatterns = [
     path("", home_view, name="home"),
@@ -27,6 +27,7 @@ urlpatterns = [
     path("contact/", contact_view, name="contact"),
     path("pipelines/", include('pipelines.urls')),
     path("run/", include('run.urls')),
+    path("fetch/", include('fetcher.urls')),
 ]
 
 if bool(settings.DEBUG):
